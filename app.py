@@ -30,21 +30,6 @@ The project sheds light on food security issues and demonstrates how data scienc
     '''
     st.write(what_it_does)
 
-# Page 2: Exploratory Data Analysis (EDA)
-def exploratory_data_analysis():
-    st.title("Exploratory Data Analysis")
-
-    # Plot 1: Total Demand by Day of the Week
-    day_demand = merged_cleaned.groupby('DayOfWeek').agg({'quantity': 'sum'}).reset_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
-    plt.title('Total Demand by Day of the Week', fontsize=16)
-    plt.xlabel('Day of the Week', fontsize=12)
-    plt.ylabel('Total Quantity', fontsize=12)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    st.pyplot(plt)
-
     # Plot 2: Total Demand by Month for Each Year
     month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
     plt.figure(figsize=(10, 6))
