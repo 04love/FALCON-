@@ -1,5 +1,8 @@
+%%writefile app.py
 import streamlit as st
 import pandas as pd
+import joblib
+import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
 import gradio as gr
