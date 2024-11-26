@@ -93,5 +93,5 @@ def community_mapping():
 # Main App Logic
 def main():
     # ... your main function (sidebar, page selection, etc.) ...
-if __name__ == "__main__":
+  if __name__ == "__main__":
     main()
