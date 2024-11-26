@@ -97,26 +97,8 @@ def machine_learning_modeling():
         # Display the table with predictions
         st.markdown(table_html, unsafe_allow_html=True)
 
-# Page 4: Community Mapping
-def community_mapping():
-    st.title("Community Mapping: Areas in Need of Food Hampers")
-    geodata = pd.read_csv("community_data.csv")
 
-    # Optional: Set your Mapbox token (if you want to use Mapbox styles)
-    #px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
 
-    # Create the map using Plotly Express
-    fig = px.scatter_mapbox(geodata,
-                            lat='Latitude',
-                            lon='Longitude',
-                            color='IncomeLevel',  # Color points by income level
-                            size='HamperRequests',  # Size points by number of hamper requests
-                            color_continuous_scale=px.colors.cyclical.IceFire,
-                            size_max=15,
-                            zoom=10,
-                            hover_name='Location',  # Display location when hovering over points
-                            hover_data={'HamperRequests': True, 'FamilySize': True, 'IncomeLevel': True, 'Latitude': False, 'Longitude': False},
-                            title='Community Map for Food Hamper Needs')
 
     fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
     st.plotly_chart(fig)
