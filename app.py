@@ -4,11 +4,15 @@ import joblib
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-import gradio as gr
 
 # Load your datasets
-df = pd.read_csv('df.csv')  # Load the raw dataset
-merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
+try:
+    df = pd.read_csv('df.csv')  # Load the raw dataset
+    merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
+    geodata = pd.read_csv("community_data.csv")  # Load the community data
+except FileNotFoundError as e:
+    st.error(f"Error: {e.filename} not found. Please check the file paths.")
+    st.stop()
 
 # Page 1: Dashboard
 def dashboard():
@@ -31,28 +35,42 @@ The project sheds light on food security issues and demonstrates how data scienc
     st.write(what_it_does)
 
     # Plot 2: Total Demand by Month for Each Year
-    month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis')
-    plt.title('Total Demand by Month for Each Year', fontsize=16)
-    plt.xlabel('Month', fontsize=12)
-    plt.ylabel('Total Quantity', fontsize=12)
-    plt.xticks(rotation=45)
-    plt.legend(title='Year', loc='upper left')
-    plt.tight_layout()
-    st.pyplot(plt)
+    if 'Year' in merged_cleaned.columns and 'Month' in merged_cleaned.columns:
+        month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis')
+        plt.title('Total Demand by Month for Each Year', fontsize=16)
+        plt.xlabel('Month', fontsize=12)
+        plt.ylabel('Total Quantity', fontsize=12)
+        plt.xticks(rotation=45)
+        plt.legend(title='Year', loc='upper left')
+        plt.tight_layout()
+        st.pyplot(plt)
+    else:
+        st.error("Required columns 'Year' or 'Month' are missing in the dataset.")
 
     # Plot 3: Scatter Plot for Age Distribution (using Plotly)
-    fig = px.scatter(merged_cleaned, x='Age', y='Frequency', trendline="ols", title='Age Distribution')
-    st.plotly_chart(fig)
+    if 'Age' in merged_cleaned.columns and 'Frequency' in merged_cleaned.columns:
+        fig = px.scatter(merged_cleaned, x='Age', y='Frequency', trendline="ols", title='Age Distribution')
+        st.plotly_chart(fig)
+    else:
+        st.error("Required columns 'Age' or 'Frequency' are missing in the dataset.")
 
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
 def simulate_future_pickups(future_days):
     # Load the trained ARIMA model
-    loaded_arima_model = joblib.load('arima_model.pkl')
+    try:
+        loaded_arima_model = joblib.load('arima_model.pkl')
+    except FileNotFoundError:
+        st.error("Error: ARIMA model file 'arima_model.pkl' not found.")
+        return None
 
     # Get the last 'actual_pickup' value as the starting point for simulation
-    last_actual_pickup = merged_cleaned['actual_pickup'].iloc[-1]
+    if 'actual_pickup' in merged_cleaned.columns:
+        last_actual_pickup = merged_cleaned['actual_pickup'].iloc[-1]
+    else:
+        st.error("'actual_pickup' column is missing in the dataset.")
+        return None
 
     # Simulate future values using the ARIMA model
     forecast = loaded_arima_model.get_forecast(steps=int(future_days))
@@ -87,13 +105,17 @@ def machine_learning_modeling():
         # Get the future predictions using ARIMA
         table_html = simulate_future_pickups(future_days)
 
-        # Display the table with predictions
-        st.markdown(table_html, unsafe_allow_html=True)
+        if table_html:
+            # Display the table with predictions
+            st.markdown(table_html, unsafe_allow_html=True)
 
 # Page 4: Community Mapping
 def community_mapping():
     st.title("Community Mapping: Areas in Need of Food Hampers")
-    geodata = pd.read_csv("community_data.csv")
+
+    if 'Latitude' not in geodata.columns or 'Longitude' not in geodata.columns:
+        st.error("Missing required columns 'Latitude' or 'Longitude' in the community data.")
+        return
 
     # Optional: Set your Mapbox token (if you want to use Mapbox styles)
     px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
@@ -130,3 +152,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
