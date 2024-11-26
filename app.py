@@ -1,118 +1,61 @@
+# Import required libraries
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-import matplotlib.pyplot as plt
-import seaborn as sns
-import joblib
+from snowflake.snowpark.context import get_active_session
+from snowflake.snowpark.functions import col
+import altair as alt
 
-# Load the dataset
-def load_data():
-    # If your data is stored in Google Drive in Colab, download and use the file path here
-    # For this example, we're assuming the data is in the current directory
-    df = pd.read_csv('merged_cleaned.csv')# Adjust path to where your file is located
-    return df
+# Set up the Streamlit app
+st.title("Food Hamper Distribution Visualizer")
+st.write(
+    """
+    Explore how different parameters impact the distribution of food hamper items, quantities, and prices!
+    """
+)
 
-# Page 1: Dashboard
-def dashboard():
-    st.title("Data Science Streamlit App")
-    st.subheader("Overview of the Data")
+# Get the current Snowflake session
+session = get_active_session()
 
-    # Load data
-    df = load_data()
-    
-    # Show the first few rows of the dataframe
-    st.write(df.head())
+# Add sliders to interact with mean and standard deviation for quantities and prices
+st.markdown("# Adjust the sliders and watch the results update 👇")
+col1, col2 = st.columns(2)
+with col1:
+    quantity_mean = st.slider("Mean of Item Quantity", 1, 20, 5)
+with col2:
+    price_stdev = st.slider("Standard Deviation of Item Price", 1, 20, 5)
 
-    # Display summary statistics
-    st.subheader("Summary Statistics")
-    st.write(df.describe())
+# Generate data dynamically in Snowflake for the food hamper project
+try:
+    session.sql(f"""
+        CREATE OR REPLACE TABLE FOOD_HAMPER_CATALOG AS
+        SELECT CONCAT('ITEM-', UNIFORM(1000, 9999, RANDOM())) AS ITEM_ID,
+               ABS(NORMAL({quantity_mean}, {price_stdev}, RANDOM())) AS ITEM_QUANTITY,
+               ABS(NORMAL(30, 10::FLOAT, RANDOM())) AS ITEM_PRICE
+        FROM TABLE(GENERATOR(ROWCOUNT => 100));
+    """).collect()
 
-    # Plot Histogram for a sample column
-    st.subheader("Visualizations")
-    fig = px.histogram(df, x="column_name", title="Histogram of Column")
-    st.plotly_chart(fig)
+    st.success("Food hamper data has been successfully generated in Snowflake!")
+except Exception as e:
+    st.error(f"Error generating data: {e}")
 
-# Page 2: Exploratory Data Analysis (EDA)
-def exploratory_data_analysis():
-    st.title("Exploratory Data Analysis")
-    df = load_data()
+# Read data from Snowflake table and visualize the histogram for item quantity distribution
+try:
+    df = session.table("FOOD_HAMPER_CATALOG").to_pandas()
+    st.write("Data preview:")
+    st.dataframe(df.head(10))
 
-    # Example: Distribution of a specific column (e.g., 'Age')
-    st.subheader("Distribution of Age")
-    fig, ax = plt.subplots()
-    sns.histplot(df['Age'], kde=True, ax=ax)
-    st.pyplot(fig)
-
-    # Correlation matrix
-    st.subheader("Correlation Matrix")
-    corr_matrix = df.corr()
-    fig, ax = plt.subplots()
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
-    st.pyplot(fig)
-
-# Page 3: Machine Learning Model
-def machine_learning_modeling():
-    st.title("Machine Learning Model")
-
-    # Load data
-    df = load_data()
-    X = df[['feature1', 'feature2', 'feature3']]  # Replace with your actual feature columns
-    y = df['target']  # Replace with your target column
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Initialize and train a Linear Regression model
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    # Model evaluation (R^2 score)
-    st.write("Model Accuracy (R^2): ", model.score(X_test, y_test))
-
-    # Save the model (optional)
-    joblib.dump(model, 'model.pkl')
-
-    # Make predictions
-    predictions = model.predict(X_test)
-    st.write("Predictions:", predictions[:10])
-
-# Page 4: Community Mapping (if relevant)
-def community_mapping():
-    st.title("Community Mapping")
-
-    # Example for creating a map using Plotly
-    geo_data = pd.read_csv("community_data.csv")  # Replace with actual file name or data source
-
-    # Plot with Plotly (adjust the columns as necessary)
-    fig = px.scatter_mapbox(
-        geo_data,
-        lat='Latitude',
-        lon='Longitude',
-        color='IncomeLevel',  # Adjust as per your data
-        size='HamperRequests',  # Adjust as per your data
-        color_continuous_scale=px.colors.cyclical.IceFire,
-        size_max=15,
-        zoom=10,
-        hover_name='Location',  # Customize for your dataset
-        title="Community Mapping for Food Hamper Needs"
+    # Create the histogram using Altair for item quantity distribution
+    chart = alt.Chart(df).mark_bar().encode(
+        alt.X("ITEM_QUANTITY", bin=alt.Bin(step=1), title="Item Quantity Distribution"),
+        y='count()',
+    ).properties(
+        title="Histogram of Item Quantities in Food Hampers"
     )
-    fig.update_layout(mapbox_style="open-street-map")
-    st.plotly_chart(fig)
 
-# Main function that connects all the pages
-def main():
-    st.sidebar.title("Streamlit App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "Machine Learning", "Community Mapping"])
+    # Display the histogram
+    st.altair_chart(chart, use_container_width=True)
+except Exception as e:
+    st.error(f"Error fetching or visualizing data: {e}")
 
-    if app_page == "Dashboard":
-        dashboard()
-    elif app_page == "EDA":
-        exploratory_data_analysis()
-    elif app_page == "Machine Learning":
-        machine_learning_modeling()
-    elif app_page == "Community Mapping":
-        community_mapping()
-
-if __name__ == "__main__":
-    main()
-
+# Footer
+st.write("---")
+st.write("Powered by Snowflake and Streamlit")
