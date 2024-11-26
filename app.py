@@ -10,7 +10,6 @@ merged_cleaned = pd.read_csv('merged_cleaned.csv')
 
 # Page 1: Dashboard
 def dashboard():
-    st.image('Logo.PNG', use_column_width=True)  # Add a logo for your app
     st.subheader("💡 Abstract:")
     inspiration = '''
 Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
