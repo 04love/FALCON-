@@ -34,35 +34,19 @@ The project sheds light on food security issues and demonstrates how data scienc
 def exploratory_data_analysis():
     st.title("Exploratory Data Analysis")
 
-    # Plot 1: Total Demand by Day of the Week
-    day_demand = merged_cleaned.groupby('DayOfWeek').agg({'quantity': 'sum'}).reset_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
-    plt.title('Total Demand by Day of the Week', fontsize=16)
-    plt.xlabel('Day of the Week', fontsize=12)
-    plt.ylabel('Total Quantity', fontsize=12)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    st.pyplot(plt)
-
-    # Plot 2: Total Demand by Month for Each Year
-    month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis')
-    plt.title('Total Demand by Month for Each Year', fontsize=16)
-    plt.xlabel('Month', fontsize=12)
-    plt.ylabel('Total Quantity', fontsize=12)
-    plt.xticks(rotation=45)
-    plt.legend(title='Year', loc='upper left')
-    plt.tight_layout()
-    st.pyplot(plt)
-
     # Plot 3: Scatter Plot for Age Distribution (using Plotly)
     fig = px.scatter(merged_cleaned, x='Age', y='Frequency', trendline="ols", title='Age Distribution')
     st.plotly_chart(fig)
 
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
+# Import the necessary module for ARIMA
+from statsmodels.tsa.arima.model import ARIMA
+import joblib
+
 def simulate_future_pickups(future_days):
+    # Ensure the ARIMA module is imported
+    from statsmodels.tsa.arima.model import ARIMA  # Add this line if it's missing
+
     # Load the trained ARIMA model
     loaded_arima_model = joblib.load('arima_model.pkl')
 
@@ -90,6 +74,7 @@ def simulate_future_pickups(future_days):
     table_html = future_predictions.to_html(index=False)
 
     return table_html
+
 
 def machine_learning_modeling():
     st.title("Future Pickup Count Simulation")
