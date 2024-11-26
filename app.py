@@ -9,8 +9,7 @@ import seaborn as sns
 try:
     df = pd.read_csv('df.csv')  # Load the raw dataset
     merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
-    client_clean = pd.read_csv("/content/Clients Data Dimension1.csv")
-    fact_clean =  pd.read_csv("/content/Food Hampers Fact.csv") # Load the community data
+ # Load the community data
 except FileNotFoundError as e:
     st.error(f"Error: {e.filename} not found. Please check the file paths.")
     st.stop()
