@@ -35,7 +35,7 @@ def exploratory_data_analysis():
     st.title("Exploratory Data Analysis")
 
     # Plot 1: Total Demand by Day of the Week
-    day_demand = merged_cleaned.groupby('DayOfWeek').agg({'quantity': 'sum'}).reset_index()
+    day_demand = fact_clean.groupby('DayOfWeek').agg({'quantity': 'sum'}).reset_index()
     plt.figure(figsize=(10, 6))
     sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
     plt.title('Total Demand by Day of the Week', fontsize=16)
@@ -46,7 +46,7 @@ def exploratory_data_analysis():
     st.pyplot(plt)
 
     # Plot 2: Total Demand by Month for Each Year
-    month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
+    month_demand = fact_clean.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
     plt.figure(figsize=(10, 6))
     sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis')
     plt.title('Total Demand by Month for Each Year', fontsize=16)
@@ -111,7 +111,7 @@ def community_mapping():
     geodata = pd.read_csv("community_data.csv")
 
     # Optional: Set your Mapbox token (if you want to use Mapbox styles)
-    px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
+    #px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
 
     # Create the map using Plotly Express
     fig = px.scatter_mapbox(geodata,
