@@ -1,97 +1,147 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import streamlit as st
+import pandas as pd
 import joblib
 import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
+import gradio as gr
 
-
-
-# Load your datasets (replace with your actual file paths)
-try:
-    merged_cleaned = pd.read_csv('merged_cleaned.csv', parse_dates=['date'])  # Ensure 'date' is datetime
-    geodata = pd.read_csv("Edmonton_postal_code.csv")
-    # ... load other datasets as needed
-except FileNotFoundError as e:
-    st.error(f"Error: {e.filename} not found. Please check the file paths.")
-    st.stop()
-
+# Load your datasets
+df = pd.read_csv('df.csv')  # Load the raw dataset
+merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
 
 # Page 1: Dashboard
 def dashboard():
-    # ... your dashboard content (plots, text, etc.) ...
     st.subheader("💡 Abstract:")
-    # ... your abstract
+    inspiration = '''
+Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
+Feature Selection: By analyzing factors such as income levels, family size, and location, we identified key variables influencing food hamper requests.
+Model Evaluation: We used various metrics to evaluate our prediction model, ensuring it generalizes well to unseen data and provides reliable forecasts for future donations.
+Deployment Challenges: We focused on ensuring scalability and accuracy, integrating the predictive models with local food bank systems to streamline food distribution.
+The project sheds light on food security issues and demonstrates how data science can enhance community outreach and food distribution efforts.
+    '''
+    st.write(inspiration)
+    st.subheader("👨🏻‍💻 What our Project Does?")
+    what_it_does = '''
+  The goal of this research is to predict food hamper demand in communities. By utilizing machine learning techniques, we aim to forecast the number of food hampers needed in various regions based on demographic factors, historical donation data, and community needs.
+  The project involves three primary stages: data cleaning and exploration, predictive modeling, and deployment. In the EDA phase, we clean and preprocess the data, identify trends and patterns, and investigate correlations between various features like income, family size, and location.
+  During the machine learning phase, we build models to predict the number of food hampers required in each community. We may also categorize areas based on the level of need (e.g., low, medium, high demand).
+  Finally, in the deployment phase, the predictive model will be accessible to local food banks through a web application, enabling real-time forecasting and more efficient food distribution.
+    '''
+    st.write(what_it_does)
 
-    # Plot 2: Total Demand by Month for Each Year (example)
-    if 'Year' in merged_cleaned.columns and 'Month' in merged_cleaned.columns and 'quantity' in merged_cleaned.columns:
-        month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
-        fig, ax = plt.subplots(figsize=(10, 6))  # Create figure and axes objects
-        sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis', ax=ax)
-        ax.set_title('Total Demand by Month for Each Year', fontsize=16)
-        ax.set_xlabel('Month', fontsize=12)
-        ax.set_ylabel('Total Quantity', fontsize=12)
-        ax.tick_params(axis='x', rotation=45)
-        plt.tight_layout()
-        st.pyplot(fig)
-    else:
-        st.error("Required columns 'Year', 'Month', or 'quantity' are missing in the dataset.")
-    # ... other parts of your dashboard
+# Page 2: Exploratory Data Analysis (EDA)
+def exploratory_data_analysis():
+    st.title("Exploratory Data Analysis")
+
+    # Plot 1: Total Demand by Day of the Week
+    day_demand = merged_cleaned.groupby('DayOfWeek').agg({'quantity': 'sum'}).reset_index()
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
+    plt.title('Total Demand by Day of the Week', fontsize=16)
+    plt.xlabel('Day of the Week', fontsize=12)
+    plt.ylabel('Total Quantity', fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    # Plot 2: Total Demand by Month for Each Year
+    month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis')
+    plt.title('Total Demand by Month for Each Year', fontsize=16)
+    plt.xlabel('Month', fontsize=12)
+    plt.ylabel('Total Quantity', fontsize=12)
+    plt.xticks(rotation=45)
+    plt.legend(title='Year', loc='upper left')
+    plt.tight_layout()
+    st.pyplot(plt)
+
+    # Plot 3: Scatter Plot for Age Distribution (using Plotly)
+    fig = px.scatter(merged_cleaned, x='Age', y='Frequency', trendline="ols", title='Age Distribution')
+    st.plotly_chart(fig)
 
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
 def simulate_future_pickups(future_days):
-    # Load the trained ARIMA model (ensure it's saved properly)
-    try:
-        loaded_arima_model = joblib.load('arima_model.pkl')
-    except FileNotFoundError:
-        st.error("Error: ARIMA model file 'arima_model.pkl' not found.")
-        return None
+    # Load the trained ARIMA model
+    loaded_arima_model = joblib.load('arima_model.pkl')
 
-    # Ensure 'actual_pickup' exists and get the last value for prediction start
-    if 'actual_pickup' not in merged_cleaned.columns:
-        st.error("'actual_pickup' column is missing in the dataset.")
-        return None
+    # Get the last 'actual_pickup' value as the starting point for simulation
     last_actual_pickup = merged_cleaned['actual_pickup'].iloc[-1]
 
-    # Create the index for forecasting (important!)
-    last_date = merged_cleaned['date'].iloc[-1]
-    future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=future_days)
+    # Simulate future values using the ARIMA model
+    forecast = loaded_arima_model.get_forecast(steps=int(future_days))
 
-    # Use the model to make predictions with the correct index
-    forecast = loaded_arima_model.get_forecast(steps=future_days)
+    # Get the predicted values and confidence intervals
     predicted_values = forecast.predicted_mean
-    future_predictions = pd.DataFrame({'date': future_dates, 'predicted_pickup': predicted_values})
+    confidence_intervals = forecast.conf_int()
 
-    return future_predictions  # Return the DataFrame
+    # Create a date range for the future predictions
+    last_date = merged_cleaned['date'].iloc[-1]
+    future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=int(future_days))
+
+    # Create a DataFrame for the predicted values
+    future_predictions = pd.DataFrame({
+        'date': future_dates,
+        'predicted_pickup': predicted_values
+    })
+
+    # Convert the DataFrame to an HTML table for display
+    table_html = future_predictions.to_html(index=False)
+
+    return table_html
 
 def machine_learning_modeling():
-    # ... your ML modeling page content ...
+    st.title("Future Pickup Count Simulation")
+    st.write("Enter the number of days to simulate future pickup counts:")
+
+    # Input for number of days to simulate
     future_days = st.number_input("Number of Days to Simulate", min_value=1, max_value=365, value=30)
+
     if st.button("Simulate"):
-        future_predictions = simulate_future_pickups(int(future_days))  # Convert to integer
+        # Get the future predictions using ARIMA
+        table_html = simulate_future_pickups(future_days)
 
-        if future_predictions is not None:
-            st.write(future_predictions) # Display DataFrame directly
+        # Display the table with predictions
+        st.markdown(table_html, unsafe_allow_html=True)
 
-            fig, ax = plt.subplots() # Create a figure and an axes
-            ax.plot(future_predictions['date'], future_predictions['predicted_pickup']) # Plot date vs prediction
-
-            st.pyplot(fig) # Display the plot
-
-# Page 4: Community Mapping (using Plotly Express)
+# Page 4: Community Mapping
 def community_mapping():
-    # ... your community mapping content ...
-    if 'Latitude' not in geodata.columns or 'Longitude' not in geodata.columns:
-        st.error("Missing required columns 'Latitude' or 'Longitude' in the community data.")
-        return
-    # ... (your mapping code using Plotly Express) ...
-# ... other functions ...
+    st.title("Community Mapping: Areas in Need of Food Hampers")
+    geodata = pd.read_csv("community_data.csv")
 
+    # Optional: Set your Mapbox token (if you want to use Mapbox styles)
+    px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
 
+    # Create the map using Plotly Express
+    fig = px.scatter_mapbox(geodata,
+                            lat='Latitude',
+                            lon='Longitude',
+                            color='IncomeLevel',  # Color points by income level
+                            size='HamperRequests',  # Size points by number of hamper requests
+                            color_continuous_scale=px.colors.cyclical.IceFire,
+                            size_max=15,
+                            zoom=10,
+                            hover_name='Location',  # Display location when hovering over points
+                            hover_data={'HamperRequests': True, 'FamilySize': True, 'IncomeLevel': True, 'Latitude': False, 'Longitude': False},
+                            title='Community Map for Food Hamper Needs')
+
+    fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
+    st.plotly_chart(fig)
 
 # Main App Logic
 def main():
-    # ... your main function (sidebar, page selection, etc.) ...
-  if __name__ == "__main__":
+    st.sidebar.title("Food Hamper Prediction App")
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Community Mapping"])
+
+    if app_page == "Dashboard":
+        dashboard()
+    elif app_page == "EDA":
+        exploratory_data_analysis()
+    elif app_page == "ML Modeling":
+        machine_learning_modeling()
+    elif app_page == "Community Mapping":
+        community_mapping()
+
+if __name__ == "__main__":
     main()
