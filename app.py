@@ -2,10 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
-import folium
-
-
-
 
 # Load the dataset with a specified encoding
 data = pd.read_csv('kijiji_cleaned.csv', encoding='latin1')
