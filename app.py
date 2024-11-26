@@ -1,116 +1,97 @@
-import streamlit as st
 import pandas as pd
-import plotly.express as px
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import streamlit as st
 import joblib
+import plotly.express as px
+from statsmodels.tsa.arima.model import ARIMA
 
-# Load the dataset with a specified encoding
 
-df = pd.read_csv('df.csv')  # Load the raw dataset
-merged_cleaned = pd.read_csv('merged_cleaned.csv')
+# Load your datasets (replace with your actual file paths)
+try:
+    merged_cleaned = pd.read_csv('merged_cleaned.csv', parse_dates=['date'])  # Ensure 'date' is datetime
+    geodata = pd.read_csv("Edmonton_postal_code.csv")
+    # ... load other datasets as needed
+except FileNotFoundError as e:
+    st.error(f"Error: {e.filename} not found. Please check the file paths.")
+    st.stop()
+
 
 # Page 1: Dashboard
 def dashboard():
+    # ... your dashboard content (plots, text, etc.) ...
     st.subheader("💡 Abstract:")
-    inspiration = '''
-Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
-Feature Selection: By analyzing factors such as income levels, family size, and location, we identified key variables influencing food hamper requests.
-Model Evaluation: We used various metrics to evaluate our prediction model, ensuring it generalizes well to unseen data and provides reliable forecasts for future donations.
-Deployment Obstacles: Scalability, security, and system integration are just a few of the challenges that come with deploying machine learning models to commercial settings. Addressing these issues required cross-team collaboration and technical expertise.
-The project sheds light on food security issues and demonstrates how data science can improve community outreach and food distribution efforts.
-    '''
-    st.write(inspiration)
-    st.subheader("👨🏻‍💻 What our Project Does?")
-    what_it_does = '''
-The goal of this research is to predict food hamper demand in communities. Using machine learning techniques, we forecast the number of food hampers needed in various regions based on demographic factors, historical donation data, and community needs.
-The project involves three main stages: data cleaning and exploration, predictive modeling, and deployment. During the exploratory data analysis (EDA) phase, we preprocess the data, identify trends, and investigate correlations between variables like income, family size, and location.
-The machine learning phase involves constructing models to predict food hamper demand, potentially categorizing areas by their level of need. In the deployment phase, the prediction model will be made available to food banks for real-time forecasting and more efficient food distribution.
-    '''
-    st.write(what_it_does)
+    # ... your abstract
 
-# Page 2: Exploratory Data Analysis (EDA)
-def exploratory_data_analysis():
-    st.title("Exploratory Data Analysis")
+    # Plot 2: Total Demand by Month for Each Year (example)
+    if 'Year' in merged_cleaned.columns and 'Month' in merged_cleaned.columns and 'quantity' in merged_cleaned.columns:
+        month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
+        fig, ax = plt.subplots(figsize=(10, 6))  # Create figure and axes objects
+        sns.barplot(x='Month', y='quantity', hue='Year', data=month_demand, palette='viridis', ax=ax)
+        ax.set_title('Total Demand by Month for Each Year', fontsize=16)
+        ax.set_xlabel('Month', fontsize=12)
+        ax.set_ylabel('Total Quantity', fontsize=12)
+        ax.tick_params(axis='x', rotation=45)
+        plt.tight_layout()
+        st.pyplot(fig)
+    else:
+        st.error("Required columns 'Year', 'Month', or 'quantity' are missing in the dataset.")
+    # ... other parts of your dashboard
 
-    # Food hamper demand vs. family size
-    fig = px.scatter(data, x='FamilySize', y='HamperRequests', trendline="ols", title='Family Size vs. Hamper Requests')
-    st.plotly_chart(fig)
+# Page 3: Machine Learning Modeling (with ARIMA Simulation)
+def simulate_future_pickups(future_days):
+    # Load the trained ARIMA model (ensure it's saved properly)
+    try:
+        loaded_arima_model = joblib.load('arima_model.pkl')
+    except FileNotFoundError:
+        st.error("Error: ARIMA model file 'arima_model.pkl' not found.")
+        return None
 
-    # Average hamper requests by income level
-    average_requests_income = data.groupby('IncomeLevel')['HamperRequests'].mean().reset_index()
-    fig = px.bar(average_requests_income, x='IncomeLevel', y='HamperRequests', title='Average Hamper Requests by Income Level')
-    st.plotly_chart(fig)
+    # Ensure 'actual_pickup' exists and get the last value for prediction start
+    if 'actual_pickup' not in merged_cleaned.columns:
+        st.error("'actual_pickup' column is missing in the dataset.")
+        return None
+    last_actual_pickup = merged_cleaned['actual_pickup'].iloc[-1]
 
-    # Hamper requests by community location
-    fig = px.box(data, x='Location', y='HamperRequests', title='Hamper Requests Distribution by Location')
-    st.plotly_chart(fig)
+    # Create the index for forecasting (important!)
+    last_date = merged_cleaned['date'].iloc[-1]
+    future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=future_days)
 
-# Page 3: Machine Learning Modeling
+    # Use the model to make predictions with the correct index
+    forecast = loaded_arima_model.get_forecast(steps=future_days)
+    predicted_values = forecast.predicted_mean
+    future_predictions = pd.DataFrame({'date': future_dates, 'predicted_pickup': predicted_values})
+
+    return future_predictions  # Return the DataFrame
+
 def machine_learning_modeling():
-    st.title("Food Hamper Demand Prediction")
-    st.write("Enter the details of the community to predict food hamper demand:")
+    # ... your ML modeling page content ...
+    future_days = st.number_input("Number of Days to Simulate", min_value=1, max_value=365, value=30)
+    if st.button("Simulate"):
+        future_predictions = simulate_future_pickups(int(future_days))  # Convert to integer
 
-    # Input fields for user to enter data
-    income_level = st.selectbox("Income Level", ['Low', 'Medium', 'High'])
-    family_size = st.slider("Family Size", 1, 10, 3)
-    location = st.selectbox("Location", data['Location'].unique())
+        if future_predictions is not None:
+            st.write(future_predictions) # Display DataFrame directly
 
-    if st.button("Predict"):
-        # Load the trained model including preprocessing
-        model = joblib.load('food_hamper_model.pkl')  # Assuming your trained model is saved as 'food_hamper_model.pkl'
+            fig, ax = plt.subplots() # Create a figure and an axes
+            ax.plot(future_predictions['date'], future_predictions['predicted_pickup']) # Plot date vs prediction
 
-        # Prepare input data as a DataFrame to match the training data structure
-        input_df = pd.DataFrame({
-            'IncomeLevel': [income_level],
-            'FamilySize': [family_size],
-            'Location': [location]
-        })
+            st.pyplot(fig) # Display the plot
 
-        # Make prediction
-        prediction = model.predict(input_df)
-
-        # Map the predicted classes to labels
-        demand_bins = [0, 100, 500, float('inf')]
-        demand_labels = ['Low', 'Medium', 'High']
-        demand_category = pd.cut(prediction, bins=demand_bins, labels=demand_labels)
-
-        # Display the predictions
-        st.success(f"Predicted Hamper Demand: {prediction[0]:,.0f} hampers")
-        st.success(f"Predicted Demand Category: {demand_category[0]}")
-
-# Page 4: Community Mapping
+# Page 4: Community Mapping (using Plotly Express)
 def community_mapping():
-    st.title("Community Mapping: Areas in Need of Food Hampers")
-    geodata = pd.read_csv("community_data.csv")  # Assuming 'community_data.csv' contains geographic data
+    # ... your community mapping content ...
+    if 'Latitude' not in geodata.columns or 'Longitude' not in geodata.columns:
+        st.error("Missing required columns 'Latitude' or 'Longitude' in the community data.")
+        return
+    # ... (your mapping code using Plotly Express) ...
+# ... other functions ...
 
-    # Create the map using Plotly Express
-    fig = px.scatter_mapbox(geodata,
-                            lat='Latitude',
-                            lon='Longitude',
-                            color='IncomeLevel',  # Color points by income level
-                            size='HamperRequests',  # Size points by number of hamper requests
-                            color_continuous_scale=px.colors.cyclical.IceFire,
-                            size_max=15,
-                            zoom=10,
-                            hover_name='Location',  # Display location when hovering over points
-                            hover_data={'HamperRequests': True, 'IncomeLevel': True, 'FamilySize': True},
-                            title='Community Map for Food Hamper Needs')
 
-    fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
-    st.plotly_chart(fig)
 
 # Main App Logic
 def main():
-    st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Community Mapping"])
-
-    if app_page == "Dashboard":
-        dashboard()
-    elif app_page == "EDA":
-        exploratory_data_analysis()
-    elif app_page == "ML Modeling":
-        machine_learning_modeling()
-    elif app_page == "Community Mapping":
-        community_mapping()
-
+    # ... your main function (sidebar, page selection, etc.) ...
 if __name__ == "__main__":
     main()
