@@ -1,132 +1,120 @@
 import streamlit as st
 import pandas as pd
-import joblib
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-import gradio as gr
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import joblib
 
-# Load your datasets
-df = pd.read_csv('df.csv')  # Load the raw dataset
-merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
+# Load the dataset
+def load_data():
+    # If your data is stored in Google Drive in Colab, download and use the file path here
+    # For this example, we're assuming the data is in the current directory
+    df = pd.read_csv('merged_cleaned.csv')# Adjust path to where your file is located
+    return df
 
 # Page 1: Dashboard
 def dashboard():
-    st.subheader("💡 Abstract:")
-    inspiration = '''
-Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
-Feature Selection: By analyzing factors such as income levels, family size, and location, we identified key variables influencing food hamper requests.
-Model Evaluation: We used various metrics to evaluate our prediction model, ensuring it generalizes well to unseen data and provides reliable forecasts for future donations.
-Deployment Challenges: We focused on ensuring scalability and accuracy, integrating the predictive models with local food bank systems to streamline food distribution.
-The project sheds light on food security issues and demonstrates how data science can enhance community outreach and food distribution efforts.
-    '''
-    st.write(inspiration)
-    st.subheader("👨🏻‍💻 What our Project Does?")
-    what_it_does = '''
-  The goal of this research is to predict food hamper demand in communities. By utilizing machine learning techniques, we aim to forecast the number of food hampers needed in various regions based on demographic factors, historical donation data, and community needs.
-  The project involves three primary stages: data cleaning and exploration, predictive modeling, and deployment. In the EDA phase, we clean and preprocess the data, identify trends and patterns, and investigate correlations between various features like income, family size, and location.
-  During the machine learning phase, we build models to predict the number of food hampers required in each community. We may also categorize areas based on the level of need (e.g., low, medium, high demand).
-  Finally, in the deployment phase, the predictive model will be accessible to local food banks through a web application, enabling real-time forecasting and more efficient food distribution.
-    '''
-    st.write(what_it_does)
+    st.title("Data Science Streamlit App")
+    st.subheader("Overview of the Data")
+
+    # Load data
+    df = load_data()
+    
+    # Show the first few rows of the dataframe
+    st.write(df.head())
+
+    # Display summary statistics
+    st.subheader("Summary Statistics")
+    st.write(df.describe())
+
+    # Plot Histogram for a sample column
+    st.subheader("Visualizations")
+    fig = px.histogram(df, x="column_name", title="Histogram of Column")
+    st.plotly_chart(fig)
 
 # Page 2: Exploratory Data Analysis (EDA)
 def exploratory_data_analysis():
     st.title("Exploratory Data Analysis")
+    df = load_data()
 
-    # Plot 3: Scatter Plot for Age Distribution (using Plotly)
-    fig = px.scatter(merged_cleaned, x='Age', y='Frequency', trendline="ols", title='Age Distribution')
-    st.plotly_chart(fig)
+    # Example: Distribution of a specific column (e.g., 'Age')
+    st.subheader("Distribution of Age")
+    fig, ax = plt.subplots()
+    sns.histplot(df['Age'], kde=True, ax=ax)
+    st.pyplot(fig)
 
-# Page 3: Machine Learning Modeling (with ARIMA Simulation)
-# Import the necessary module for ARIMA
-from statsmodels.tsa.arima.model import ARIMA
-import joblib
+    # Correlation matrix
+    st.subheader("Correlation Matrix")
+    corr_matrix = df.corr()
+    fig, ax = plt.subplots()
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+    st.pyplot(fig)
 
-def simulate_future_pickups(future_days):
-    # Ensure the ARIMA module is imported
-    from statsmodels.tsa.arima.model import ARIMA  # Add this line if it's missing
-
-    # Load the trained ARIMA model
-    loaded_arima_model = joblib.load('arima_model.pkl')
-
-    # Get the last 'actual_pickup' value as the starting point for simulation
-    last_actual_pickup = merged_cleaned['actual_pickup'].iloc[-1]
-
-    # Simulate future values using the ARIMA model
-    forecast = loaded_arima_model.get_forecast(steps=int(future_days))
-
-    # Get the predicted values and confidence intervals
-    predicted_values = forecast.predicted_mean
-    confidence_intervals = forecast.conf_int()
-
-    # Create a date range for the future predictions
-    last_date = merged_cleaned['date'].iloc[-1]
-    future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=int(future_days))
-
-    # Create a DataFrame for the predicted values
-    future_predictions = pd.DataFrame({
-        'date': future_dates,
-        'predicted_pickup': predicted_values
-    })
-
-    # Convert the DataFrame to an HTML table for display
-    table_html = future_predictions.to_html(index=False)
-
-    return table_html
-
-
+# Page 3: Machine Learning Model
 def machine_learning_modeling():
-    st.title("Future Pickup Count Simulation")
-    st.write("Enter the number of days to simulate future pickup counts:")
+    st.title("Machine Learning Model")
 
-    # Input for number of days to simulate
-    future_days = st.number_input("Number of Days to Simulate", min_value=1, max_value=365, value=30)
+    # Load data
+    df = load_data()
+    X = df[['feature1', 'feature2', 'feature3']]  # Replace with your actual feature columns
+    y = df['target']  # Replace with your target column
 
-    if st.button("Simulate"):
-        # Get the future predictions using ARIMA
-        table_html = simulate_future_pickups(future_days)
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        # Display the table with predictions
-        st.markdown(table_html, unsafe_allow_html=True)
+    # Initialize and train a Linear Regression model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
 
-# Page 4: Community Mapping
+    # Model evaluation (R^2 score)
+    st.write("Model Accuracy (R^2): ", model.score(X_test, y_test))
+
+    # Save the model (optional)
+    joblib.dump(model, 'model.pkl')
+
+    # Make predictions
+    predictions = model.predict(X_test)
+    st.write("Predictions:", predictions[:10])
+
+# Page 4: Community Mapping (if relevant)
 def community_mapping():
-    st.title("Community Mapping: Areas in Need of Food Hampers")
-    geodata = pd.read_csv("community_data.csv")
+    st.title("Community Mapping")
 
-    # Optional: Set your Mapbox token (if you want to use Mapbox styles)
-    px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
+    # Example for creating a map using Plotly
+    geo_data = pd.read_csv("community_data.csv")  # Replace with actual file name or data source
 
-    # Create the map using Plotly Express
-    fig = px.scatter_mapbox(geodata,
-                            lat='Latitude',
-                            lon='Longitude',
-                            color='IncomeLevel',  # Color points by income level
-                            size='HamperRequests',  # Size points by number of hamper requests
-                            color_continuous_scale=px.colors.cyclical.IceFire,
-                            size_max=15,
-                            zoom=10,
-                            hover_name='Location',  # Display location when hovering over points
-                            hover_data={'HamperRequests': True, 'FamilySize': True, 'IncomeLevel': True, 'Latitude': False, 'Longitude': False},
-                            title='Community Map for Food Hamper Needs')
-
-    fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
+    # Plot with Plotly (adjust the columns as necessary)
+    fig = px.scatter_mapbox(
+        geo_data,
+        lat='Latitude',
+        lon='Longitude',
+        color='IncomeLevel',  # Adjust as per your data
+        size='HamperRequests',  # Adjust as per your data
+        color_continuous_scale=px.colors.cyclical.IceFire,
+        size_max=15,
+        zoom=10,
+        hover_name='Location',  # Customize for your dataset
+        title="Community Mapping for Food Hamper Needs"
+    )
+    fig.update_layout(mapbox_style="open-street-map")
     st.plotly_chart(fig)
 
-# Main App Logic
+# Main function that connects all the pages
 def main():
-    st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Community Mapping"])
+    st.sidebar.title("Streamlit App")
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "Machine Learning", "Community Mapping"])
 
     if app_page == "Dashboard":
         dashboard()
     elif app_page == "EDA":
         exploratory_data_analysis()
-    elif app_page == "ML Modeling":
+    elif app_page == "Machine Learning":
         machine_learning_modeling()
     elif app_page == "Community Mapping":
         community_mapping()
 
 if __name__ == "__main__":
     main()
+
