@@ -114,8 +114,6 @@ def main():
         exploratory_data_analysis()
     elif app_page == "ML Modeling":
         machine_learning_modeling()
-    elif app_page == "Community Mapping":
-        community_mapping()
 
 if __name__ == "__main__":
     main()
