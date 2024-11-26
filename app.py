@@ -110,7 +110,7 @@ def community_mapping():
     geodata = pd.read_csv("community_data.csv")
 
     # Optional: Set your Mapbox token (if you want to use Mapbox styles)
-    px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
+    #px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
 
     # Create the map using Plotly Express
     fig = px.scatter_mapbox(geodata,
