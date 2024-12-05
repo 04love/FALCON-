@@ -58,7 +58,7 @@ def exploratory_data_analysis():
 
 def machine_learning_modeling():
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
-def simulate_future_pickups(future_days):
+ def simulate_future_pickups(future_days):
     # Load the trained ARIMA model
     try:
         loaded_arima_model = joblib.load('arima_model.pkl')
