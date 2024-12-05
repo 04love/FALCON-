@@ -33,7 +33,7 @@ The project sheds light on food security issues and demonstrates how data scienc
   Finally, in the deployment phase, the predictive model will be accessible to local food banks through a web application, enabling real-time forecasting and more efficient food distribution.
     '''
     st.write(what_it_does)
-
+def exploratory_data_analysis():
     # Plot 2: Total Demand by Month for Each Year
     if 'Year' in merged_cleaned.columns and 'Month' in merged_cleaned.columns:
         month_demand = merged_cleaned.groupby(['Year', 'Month']).agg({'quantity': 'sum'}).reset_index()
@@ -55,7 +55,7 @@ The project sheds light on food security issues and demonstrates how data scienc
         st.plotly_chart(fig)
     else:
         st.error("Required columns 'Age' or 'Frequency' are missing in the dataset.")
-
+def ML Modeling:
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
 def simulate_future_pickups(future_days):
     # Load the trained ARIMA model
