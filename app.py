@@ -55,7 +55,8 @@ def exploratory_data_analysis():
         st.plotly_chart(fig)
     else:
         st.error("Required columns 'Age' or 'Frequency' are missing in the dataset.")
-def ML Modeling:
+
+def machine_learning_modeling():
 # Page 3: Machine Learning Modeling (with ARIMA Simulation)
 def simulate_future_pickups(future_days):
     # Load the trained ARIMA model
@@ -94,7 +95,6 @@ def simulate_future_pickups(future_days):
 
     return table_html
 
-def machine_learning_modeling():
     st.title("Future Pickup Count Simulation")
     st.write("Enter the number of days to simulate future pickup counts:")
 
