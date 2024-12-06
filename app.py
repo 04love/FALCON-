@@ -139,8 +139,8 @@ def machine_learning_modeling():
         st.write("Predicted Food Hamper Demand for the Next {0} Days".format(future_days))
         st.write(future_predictions)
 
-        # Optionally, you can show a plot of the forecasted demand
-        st.line_chart(future_predictions.set_index('pickup_date')['Predicted Hamper Demand']) 
+        st.line_chart(future_predictions.set_index('future_dates')['predicted_values'])
+                      
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
