@@ -2,17 +2,22 @@ import streamlit as st
 import pandas as pd
 import os
 
-# Check if the file exists before loading
+import streamlit as st
+import pandas as pd
+import os
+
+# Function to load datasets
 def load_data():
     try:
-        if not os.path.exists('merged_cleaned.csv'):
-            st.error("Error: 'merged_cleaned.csv' file not found. Please check the file path or upload it.")
-            return None
-        
-        df = pd.read_csv('df.csv')  # Load the raw dataset
-        merged_cleaned = pd.read_csv('merged_cleaned.csv')  # Load the cleaned dataset
-        return df, merged_cleaned
-    
+        # Load datasets
+        df = pd.read_csv('df.csv')
+        merged_cleaned = pd.read_csv('merged_cleaned.csv')
+        food_hampers_fact = pd.read_csv('/content/Food Hampers Fact.csv')
+        clients_data = pd.read_csv('/content/Clients Data Dimension1.csv')
+        return df, merged_cleaned, food_hampers_fact, clients_data
+    except FileNotFoundError as e:
+        st.error(f"Error: {e.filename} not found. Please upload the file.")
+        return None
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return None
@@ -20,7 +25,7 @@ def load_data():
 # Load the data
 data = load_data()
 if data:
-    df, merged_cleaned = data
+    df, merged_cleaned, food_hampers_fact, clients_data = data
 
 # If you're using file uploader
 def upload_data():
@@ -61,15 +66,41 @@ def exploratory_data_analysis():
     plt.xlabel('Age')
     plt.ylabel('Frequency')
     plt.show()
-    average_prices_bathrooms = data.groupby('Bathrooms')['Price'].mean().reset_index()
-    fig = px.bar(average_prices_bathrooms, x='Bathrooms', y='Price', title='Average Price by Bathrooms')
-    st.plotly_chart(fig)
+    
+    data['pickup_date'] = pd.to_datetime(data['pickup_date'])
+#checking the average pickups on day basis
+    data['DayOfWeek'] = data['pickup_date'].dt.day_name()
 
+#  Group by 'DayOfWeek' and calculate total demand (quantity) for each day
+    day_demand = data.groupby('DayOfWeek')['quantity'].sum().reset_index()
 
-    average_prices = data.groupby('Bedrooms')['Price'].mean().reset_index()
-    fig = px.bar(average_prices, x='Bedrooms', y='Price', title='Average Price by Bedrooms')
-    st.plotly_chart(fig)
+#  Sort days in the correct order (Monday to Sunday)
+   day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+   day_demand['DayOfWeek'] = pd.Categorical(day_demand['DayOfWeek'], categories=day_order, ordered=True)
+   day_demand = day_demand.sort_values('DayOfWeek')
 
-    fig = px.box(data, x='Type', y='Price', title='Price Distribution by Property Type')
-    st.plotly_chart(fig)
+#  Create a bar plot to visualize the demand by day
+   plt.figure(figsize=(10, 6))
+   sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
+   plt.title('Total Demand by Day of the Week', fontsize=16)
+   plt.xlabel('Day of the Week', fontsize=12)
+   plt.ylabel('Total Quantity', fontsize=12)
+   plt.xticks(rotation=45)
+   plt.tight_layout()
+
+# Show the plot
+   plt.show()
+
+# Main App Logic
+def main():
+    st.sidebar.title("Food Hamper Prediction App")
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Community Mapping"])
+
+    if app_page == "Dashboard":
+        dashboard()
+    elif app_page == "EDA":
+        exploratory_data_analysis()
+
+if __name__ == "__main__":
+    main()
     
