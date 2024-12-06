@@ -62,7 +62,7 @@ def exploratory_data_analysis():
 
     # Histograms for numerical columns
     merged_cleaned['age'].hist(bins=10)
-    plt.title('Age Distribution')
+    #plt.title('Age Distribution')
     plt.xlabel('Age')
     plt.ylabel('Frequency')
     plt.show()
