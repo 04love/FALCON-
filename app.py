@@ -1,3 +1,4 @@
+!pip install streamlit joblib
 import streamlit as st
 import pandas as pd
 import os
@@ -112,13 +113,13 @@ def machine_learning_modeling():
             return
 
         # Assuming we are using historical data from merged_cleaned DataFrame
-        if 'date' not in merged_cleaned.columns or 'actual_pickup' not in merged_cleaned.columns:
+        if 'pickup_date' not in merged_cleaned.columns or 'record_count' not in df.columns:
             st.error("Required columns 'date' or 'actual_pickup' are missing in the dataset.")
             return
         
         # Convert the 'date' column to datetime if it's not already
-        merged_cleaned['date'] = pd.to_datetime(merged_cleaned['date'])
-        merged_cleaned.set_index('date', inplace=True)
+        merged_cleaned['pickup_date'] = pd.to_datetime(merged_cleaned['pickup_date'])
+        merged_cleaned.set_index('pickup_date', inplace=True)
 
         # Use ARIMA model to forecast future demand (number of hampers)
         forecast = model.get_forecast(steps=future_days)
@@ -139,7 +140,7 @@ def machine_learning_modeling():
         st.write(future_predictions)
 
         # Optionally, you can show a plot of the forecasted demand
-        st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand']) 
+        st.line_chart(future_predictions.set_index('pickup_Date')['Predicted Hamper Demand']) 
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
