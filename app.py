@@ -148,6 +148,8 @@ def main():
         dashboard()
     elif app_page == "EDA":
         exploratory_data_analysis()
+    elif app_page == "ML Modeling":
+        machine_learning_modeling()
 
 if __name__ == "__main__":
     main()
