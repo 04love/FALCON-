@@ -139,7 +139,7 @@ def machine_learning_modeling():
         st.write("Predicted Food Hamper Demand for the Next {0} Days".format(future_days))
         st.write(future_predictions)
 
-        st.line_chart(future_predictions.set_index('future_dates')['predicted_values'])
+        st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
                       
 # Main App Logic
 def main():
