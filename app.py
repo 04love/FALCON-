@@ -12,8 +12,8 @@ def load_data():
         # Load datasets
         df = pd.read_csv('df.csv')
         merged_cleaned = pd.read_csv('merged_cleaned.csv')
-        food_hampers_fact = pd.read_csv('/content/Food Hampers Fact.csv')
-        clients_data = pd.read_csv('/content/Clients Data Dimension1.csv')
+        food_hampers_fact = pd.read_csv('Food Hampers Fact.csv')
+        clients_data = pd.read_csv('Clients Data Dimension1.csv')
         return df, merged_cleaned, food_hampers_fact, clients_data
     except FileNotFoundError as e:
         st.error(f"Error: {e.filename} not found. Please upload the file.")
