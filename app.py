@@ -75,21 +75,21 @@ def exploratory_data_analysis():
     day_demand = data.groupby('DayOfWeek')['quantity'].sum().reset_index()
 
 #  Sort days in the correct order (Monday to Sunday)
-   day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-   day_demand['DayOfWeek'] = pd.Categorical(day_demand['DayOfWeek'], categories=day_order, ordered=True)
-   day_demand = day_demand.sort_values('DayOfWeek')
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    day_demand['DayOfWeek'] = pd.Categorical(day_demand['DayOfWeek'], categories=day_order, ordered=True)
+    day_demand = day_demand.sort_values('DayOfWeek')
 
 #  Create a bar plot to visualize the demand by day
-   plt.figure(figsize=(10, 6))
-   sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
-   plt.title('Total Demand by Day of the Week', fontsize=16)
-   plt.xlabel('Day of the Week', fontsize=12)
-   plt.ylabel('Total Quantity', fontsize=12)
-   plt.xticks(rotation=45)
-   plt.tight_layout()
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
+    plt.title('Total Demand by Day of the Week', fontsize=16)
+    plt.xlabel('Day of the Week', fontsize=12)
+    plt.ylabel('Total Quantity', fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
 # Show the plot
-   plt.show()
+    plt.show()
 
 # Main App Logic
 def main():
