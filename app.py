@@ -93,6 +93,52 @@ def exploratory_data_analysis():
 # Show the plot
     plt.show()
     st.pyplot(plt.gcf())
+
+# Page 3: Machine Learning Modeling (ARIMA for Food Hamper Prediction)
+def machine_learning_modeling():
+    st.title("Food Hamper Demand Prediction")
+    st.write("Enter the details to predict the number of food hampers needed in the future:")
+
+    # Input field to select the number of days to predict
+    future_days = st.number_input("Number of Days to Forecast", min_value=1, max_value=365, value=30)
+
+    if st.button("Predict"):
+        # Load the trained ARIMA model
+        try:
+            model = joblib.load('arima_model.pkl')  # Make sure the ARIMA model is saved with this name
+        except FileNotFoundError:
+            st.error("Error: ARIMA model file 'arima_model.pkl' not found.")
+            return
+
+        # Assuming we are using historical data from merged_cleaned DataFrame
+        if 'date' not in merged_cleaned.columns or 'actual_pickup' not in merged_cleaned.columns:
+            st.error("Required columns 'date' or 'actual_pickup' are missing in the dataset.")
+            return
+        
+        # Convert the 'date' column to datetime if it's not already
+        merged_cleaned['date'] = pd.to_datetime(merged_cleaned['date'])
+        merged_cleaned.set_index('date', inplace=True)
+
+        # Use ARIMA model to forecast future demand (number of hampers)
+        forecast = model.get_forecast(steps=future_days)
+
+        # Get the predicted values and confidence intervals
+        predicted_values = forecast.predicted_mean
+        confidence_intervals = forecast.conf_int()
+
+        # Create a DataFrame to show the results
+        future_dates = pd.date_range(start=merged_cleaned.index[-1] + pd.Timedelta(days=1), periods=future_days)
+        future_predictions = pd.DataFrame({
+            'Date': future_dates,
+            'Predicted Hamper Demand': predicted_values
+        })
+
+        # Display the predictions
+        st.write("Predicted Food Hamper Demand for the Next {0} Days".format(future_days))
+        st.write(future_predictions)
+
+        # Optionally, you can show a plot of the forecasted demand
+        st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand']) 
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
