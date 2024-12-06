@@ -62,12 +62,12 @@ def exploratory_data_analysis():
 
     # Histograms for numerical columns
     merged_cleaned['age'].hist(bins=10)
-    fig = plt.figure(figsize = (8,8))
+    #fig = plt.figure(figsize = (8,8))
     plt.title('Age Distribution')
     plt.xlabel('Age')
     plt.ylabel('Frequency')
     plt.show()
-    st.pyplot(fig)
+    st.pyplot(plt.gcf())
     
 #     data['pickup_date'] = pd.to_datetime(data['pickup_date'])
 # #checking the average pickups on day basis
