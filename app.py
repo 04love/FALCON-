@@ -69,30 +69,30 @@ def exploratory_data_analysis():
     plt.show()
     st.pyplot(plt.gcf())
     
-#     data['pickup_date'] = pd.to_datetime(data['pickup_date'])
-# #checking the average pickups on day basis
-#     data['DayOfWeek'] = data['pickup_date'].dt.day_name()
+    merged_cleaned['pickup_date'] = pd.to_datetime(merged_cleaned['pickup_date'])
+#checking the average pickups on day basis
+    merged_cleaned['DayOfWeek'] = merged_cleaned['pickup_date'].dt.day_name()
 
-# #  Group by 'DayOfWeek' and calculate total demand (quantity) for each day
-#     day_demand = data.groupby('DayOfWeek')['quantity'].sum().reset_index()
+#  Group by 'DayOfWeek' and calculate total demand (quantity) for each day
+    day_demand = merged_cleaned.groupby('DayOfWeek')['quantity'].sum().reset_index()
 
-# #  Sort days in the correct order (Monday to Sunday)
-#     day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-#     day_demand['DayOfWeek'] = pd.Categorical(day_demand['DayOfWeek'], categories=day_order, ordered=True)
-#     day_demand = day_demand.sort_values('DayOfWeek')
+#  Sort days in the correct order (Monday to Sunday)
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    day_demand['DayOfWeek'] = pd.Categorical(day_demand['DayOfWeek'], categories=day_order, ordered=True)
+    day_demand = day_demand.sort_values('DayOfWeek')
 
-# #  Create a bar plot to visualize the demand by day
-#     plt.figure(figsize=(10, 6))
-#     sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
-#     plt.title('Total Demand by Day of the Week', fontsize=16)
-#     plt.xlabel('Day of the Week', fontsize=12)
-#     plt.ylabel('Total Quantity', fontsize=12)
-#     plt.xticks(rotation=45)
-#     plt.tight_layout()
+#  Create a bar plot to visualize the demand by day
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
+    plt.title('Total Demand by Day of the Week', fontsize=16)
+    plt.xlabel('Day of the Week', fontsize=12)
+    plt.ylabel('Total Quantity', fontsize=12)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
-# # Show the plot
-#     plt.show()
-
+# Show the plot
+    plt.show()
+    st.pyplot(plt.gcf())
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
