@@ -141,7 +141,7 @@ def machine_learning_modeling():
         st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
         
 # Page 1: XAI
-def Explainable AI():
+def Explainable_AI():
     st.image('XAI.PNG', use_column_width=True)
     st.image('XAI1.PNG', use_column_width=True)                  
 # Main App Logic
@@ -156,7 +156,7 @@ def main():
     elif app_page == "ML Modeling":
         machine_learning_modeling()
     elif app_page == "Explainable AI":
-        Explainable AI()   
+        Explainable_AI()   
 
 if __name__ == "__main__":
     main()
