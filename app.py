@@ -38,7 +38,7 @@ def upload_data():
 
 # Page 1: Dashboard
 def dashboard():
-    st.image('Logo.PNG', use_column_width=True)
+    st.image('Logo.png', use_column_width=True)
     st.subheader("💡 Abstract:")
     inspiration = '''
 Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
@@ -142,8 +142,8 @@ def machine_learning_modeling():
         
 # Page 1: XAI
 def Explainable_AI():
-    st.image('XAI.PNG', use_column_width=True)
-    st.image('XAI1.PNG', use_column_width=True)                  
+    st.image('XAI.png', use_column_width=True)
+    st.image('XAI1.png', use_column_width=True)                  
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
