@@ -140,6 +140,27 @@ def machine_learning_modeling():
         st.write(future_predictions)
 
         st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
+
+# Page 4: Community Mapping
+def community_mapping():
+    geodata = pd.read_csv("Edmonton_postal_code.csv")
+    # px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
+
+    # Create the map using Plotly Express
+    fig = px.scatter_mapbox(geodata,
+                            lat='Latitude',
+                            lon='Longitude',
+                            color='address',  # Color points by population, or choose another column
+                            size='record_count',  # Size points by price, or choose another column
+                            color_continuous_scale=px.colors.cyclical.IceFire,
+                            size_max=15,
+                            zoom=10,
+                            hover_name='Type',  # Display property type when hovering over points
+                            hover_data={'Price': True, 'Population': True, 'Bathrooms': True, 'Bedrooms': True, 'Size': True, 'Latitude': False, 'Longitude': False},
+                            title='Map')
+
+    fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
+    st.plotly_chart(fig)
                       
 # Main App Logic
 def main():
@@ -152,6 +173,8 @@ def main():
         exploratory_data_analysis()
     elif app_page == "ML Modeling":
         machine_learning_modeling()
+    elif app_page == "Community Mapping":
+        community_mapping()   
 
 if __name__ == "__main__":
     main()
