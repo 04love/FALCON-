@@ -38,6 +38,7 @@ def upload_data():
 
 # Page 1: Dashboard
 def dashboard():
+    st.image('Logo.PNG', use_column_width=True)
     st.subheader("💡 Abstract:")
     inspiration = '''
 Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
@@ -138,32 +139,15 @@ def machine_learning_modeling():
         st.write(future_predictions)
 
         st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
-
-# Page 4: Community Mapping
-def community_mapping():
-    geodata = pd.read_csv("Edmonton_postal_code.csv")
-    # px.set_mapbox_access_token('YOUR_MAPBOX_TOKEN_HERE')
-
-    # Create the map using Plotly Express
-    fig = px.scatter_mapbox(geodata,
-                            lat='Latitude',
-                            lon='Longitude',
-                            color='address',  # Color points by population, or choose another column
-                            size='record_count',  # Size points by price, or choose another column
-                            color_continuous_scale=px.colors.cyclical.IceFire,
-                            size_max=15,
-                            zoom=10,
-                            hover_name='Type',  # Display property type when hovering over points
-                            hover_data={'Price': True, 'Population': True, 'Bathrooms': True, 'Bedrooms': True, 'Size': True, 'Latitude': False, 'Longitude': False},
-                            title='Map')
-
-    fig.update_layout(mapbox_style="open-street-map")  # Use OpenStreetMap style
-    st.plotly_chart(fig)
-                      
+        
+# Page 1: XAI
+def Explainable AI():
+    st.image('XAI.PNG', use_column_width=True)
+    st.image('XAI1.PNG', use_column_width=True)                  
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Community Mapping"])
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Explainable AI"])
 
     if app_page == "Dashboard":
         dashboard()
@@ -171,8 +155,8 @@ def main():
         exploratory_data_analysis()
     elif app_page == "ML Modeling":
         machine_learning_modeling()
-    elif app_page == "Community Mapping":
-        community_mapping()   
+    elif app_page == "Explainable AI":
+        Explainable AI()   
 
 if __name__ == "__main__":
     main()
