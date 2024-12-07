@@ -1,11 +1,9 @@
 #pip install streamlit joblib
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
-import streamlit as st
-import pandas as pd
-import os
 import seaborn as sns
 import joblib
 # Function to load datasets
