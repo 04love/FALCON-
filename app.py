@@ -94,13 +94,18 @@ def exploratory_data_analysis():
 # Show the plot
     plt.show()
     st.pyplot(plt.gcf())
-        # Embedding Google Map using HTML iframe
+# Page 3: Exploratory Data Analysis (EDA)
+def Visualizations():
+    st.title('Streamlit App with Embedded My Google Map')
+    st.write('Here is an example of embedded LDS Londonderry Map:')
+
+    # Embedding Google Map using HTML iframe
     st.markdown("""
-    <iframe src="https://lookerstudio.google.com/reporting/20395848-bdf5-407a-a1f9-38981b686102" width="640" height="480"></iframe>
+    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1jQ1HjABF3IAWsfOrDskcluzLQvcST-Q&ehbc=2E312F" width="640" height="480"></iframe>
     """, unsafe_allow_html=True)
    
 
-# Page 3: Machine Learning Modeling (ARIMA for Food Hamper Prediction)
+# Page 4: Machine Learning Modeling (ARIMA for Food Hamper Prediction)
 def machine_learning_modeling():
     st.title("Food Hamper Demand Prediction")
     st.write("Enter the details to predict the number of food hampers needed in the future:")
@@ -145,19 +150,21 @@ def machine_learning_modeling():
 
         st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
         
-# Page 1: XAI
+# Page 5: XAI
 def Explainable_AI():
     st.image('XAI.png', use_column_width=True)
     st.image('XAI1.png', use_column_width=True)                  
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "Visualizations", "ML Modeling", "Explainable AI"])
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard","EDA", "Visualizations", "ML Modeling", "Explainable AI"])
 
     if app_page == "Dashboard":
         dashboard()
-    elif app_page == "Visualizations":
+    elif app_page == "EDA":
         exploratory_data_analysis()
+    elif app_page == "Visualizations":
+        Visualizations()
     elif app_page == "ML Modeling":
         machine_learning_modeling()
     elif app_page == "Explainable AI":
