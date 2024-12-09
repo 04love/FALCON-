@@ -156,7 +156,7 @@ def Explainable_AI():
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard","EDA", "Visualizations", "ML Modeling", "Explainable AI"])
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard","Visualizations", "Looker vis", "ML Modeling", "Explainable AI"])
 
     if app_page == "Dashboard":
         dashboard()
