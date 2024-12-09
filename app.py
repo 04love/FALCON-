@@ -156,7 +156,7 @@ def main():
 
     if app_page == "Dashboard":
         dashboard()
-    elif app_page == "EDA":
+    elif app_page == "Visualizations":
         exploratory_data_analysis()
     elif app_page == "ML Modeling":
         machine_learning_modeling()
