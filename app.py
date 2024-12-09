@@ -96,7 +96,7 @@ def exploratory_data_analysis():
     st.pyplot(plt.gcf())
         # Embedding Google Map using HTML iframe
     st.markdown("""
-    <iframe src="https://lookerstudio.google.com/reporting/20395848-bdf5-407a-a1f9-38981b686102/page/VVqIE" width="640" height="480"></iframe>
+    <iframe src="https://lookerstudio.google.com/reporting/20395848-bdf5-407a-a1f9-38981b686102/page/p_ougphl3nmd " width="640" height="480"></iframe>
     """, unsafe_allow_html=True)
    
 
