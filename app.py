@@ -94,6 +94,11 @@ def exploratory_data_analysis():
 # Show the plot
     plt.show()
     st.pyplot(plt.gcf())
+        # Embedding Google Map using HTML iframe
+    st.markdown("""
+    <iframe src="https://lookerstudio.google.com/reporting/20395848-bdf5-407a-a1f9-38981b686102/page/VVqIE" width="640" height="480"></iframe>
+    """, unsafe_allow_html=True)+
+   
 
 # Page 3: Machine Learning Modeling (ARIMA for Food Hamper Prediction)
 def machine_learning_modeling():
@@ -147,7 +152,7 @@ def Explainable_AI():
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "EDA", "ML Modeling", "Explainable AI"])
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard", "Visualizations", "ML Modeling", "Explainable AI"])
 
     if app_page == "Dashboard":
         dashboard()
