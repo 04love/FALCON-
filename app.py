@@ -101,7 +101,7 @@ def Visualizations():
 
     # Embedding Google Map using HTML iframe
     st.markdown("""
-    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1jQ1HjABF3IAWsfOrDskcluzLQvcST-Q&ehbc=2E312F" width="640" height="480"></iframe>
+    <iframe src="https://lookerstudio.google.com/reporting/20395848-bdf5-407a-a1f9-38981b686102" width="640" height="480"></iframe>
     """, unsafe_allow_html=True)
    
 
