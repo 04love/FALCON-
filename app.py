@@ -6,6 +6,16 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+from snowflake.snowpark import Session
+
+# Establish Snowflake session
+@st.cache_resource
+def create_session():
+    return Session.builder.configs(st.secrets.snowflake).create()
+
+session = create_session()
+st.success("Connected to Snowflake!")
+
 # Function to load datasets
 def load_data():
     try:
