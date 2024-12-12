@@ -121,7 +121,7 @@ def machine_learning_modeling():
     st.write("Enter the details to predict the number of food hampers needed in the future:")
 
     # Input field to select the number of days to predict
-    future_days = st.number_input("Number of Days to Forecast", min_value=1, max_value=365, value=30)
+    future_days = st.number_input("Number of Days to Forecast", min_value=1, max_value=365, value=15)
 
     if st.button("Predict"):
         # Load the trained ARIMA model
@@ -144,7 +144,7 @@ def machine_learning_modeling():
         forecast = model.get_forecast(steps=future_days)
 
         # Get the predicted values and confidence intervals
-        predicted_values = forecast.predicted_mean
+        predicted_values = forecast.predicted_mean.round().astype(int)
         confidence_intervals = forecast.conf_int()
 
         # Create a DataFrame to show the results
