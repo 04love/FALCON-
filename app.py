@@ -191,7 +191,7 @@ def Explainable_AI():
 def Chat_With_Data():
     st.title("Food Hamper Demand Forecasting")
     st.write("Upload Food Hamper project related files and ask questions based on the data.")
-# File upload
+    # File upload
     uploaded_files = st.file_uploader("Upload your project files (CSV/Excel)", type=["csv", "xlsx"], accept_multiple_files=True)
 
     # Prepare data context
@@ -216,18 +216,17 @@ def Chat_With_Data():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    user_input = st.text_input("Ask a question about Food Hamper project:", key="input")
+    user_input = st.text_input("Ask a question about your project:", key="input")
     if st.button("Send"):
         if user_input and context:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            response = generate_response(context)
+            response = generate_response(user_input, context)
             st.session_state.chat_history.append({"role": "assistant", "content": response})
         elif not context:
             st.error("Please upload relevant files to ask project-specific questions.")
 
     for message in st.session_state.chat_history:
         st.write(f"{message['role'].capitalize()}: {message['content']}")
-
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
