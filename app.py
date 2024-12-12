@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+import google.generativeai as genai
 from snowflake.snowpark import Session
 
 # Establish Snowflake session
@@ -46,6 +47,25 @@ def upload_data():
         return df
     return None
 
+# Set up the API key
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', st.secrets.get("GOOGLE_API_KEY"))
+genai.configure(api_key=GOOGLE_API_KEY)
+
+
+# Function to generate response from the model
+def generate_response(prompt):
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)  # Pass the prompt directly
+
+        # Debug: Print the response structure
+        # st.write(response) # Comment out for brevity
+
+        return response.text  # Use 'text' attribute instead of 'generated_text'
+    except Exception as e:
+        st.error(f"Error generating response: {e}")
+        return "Sorry, I couldn't process your request."
+        
 # Page 1: Dashboard
 def dashboard():
     st.image('Logo.png', use_column_width=True)
@@ -163,11 +183,31 @@ def machine_learning_modeling():
 # Page 5: XAI
 def Explainable_AI():
     st.image('XAI.png', use_column_width=True)
-    st.image('XAI1.png', use_column_width=True)                  
+    st.image('XAI1.png', use_column_width=True)  
+
+# Page 6: chatbot
+
+# Streamlit app
+def Chat_With_Data():
+    st.title("Trip Advisor Chatbot")
+    st.write("Ask me anything about travel destinations, trip planning, and more.")
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_input = st.text_input("You:", key="input")
+    if st.button("Send"):
+        if user_input:
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            response = generate_response(user_input)
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
+
+    for message in st.session_state.chat_history:
+        st.write(f"{message['role'].capitalize()}: {message['content']}")
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
-    app_page = st.sidebar.radio("Select a Page", ["Dashboard","Visualizations", "Looker vis", "ML Modeling", "Explainable AI"])
+    app_page = st.sidebar.radio("Select a Page", ["Dashboard","Visualizations", "Looker vis", "ML Modeling", "Explainable AI","Chat With Data])
 
     if app_page == "Dashboard":
         dashboard()
@@ -178,7 +218,10 @@ def main():
     elif app_page == "ML Modeling":
         machine_learning_modeling()
     elif app_page == "Explainable AI":
-        Explainable_AI()   
+        Explainable_AI()
+    elif app_page == "Chat With Data":
+        Chat_With_Data()                                              
+                                                  
 
 if __name__ == "__main__":
     main()
