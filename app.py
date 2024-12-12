@@ -189,8 +189,8 @@ def Explainable_AI():
 
 # Streamlit app
 def Chat_With_Data():
-    st.title("Trip Advisor Chatbot")
-    st.write("Ask me anything about travel destinations, trip planning, and more.")
+    st.title("Food Hamper Demand Forecasting")
+    st.write("Ask me anything about Data Collection, Forcasting, and more.")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
