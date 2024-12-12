@@ -220,7 +220,7 @@ def Chat_With_Data():
     if st.button("Send"):
         if user_input and context:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            response = generate_response(user_input, context)
+            response = generate_response(context)
             st.session_state.chat_history.append({"role": "assistant", "content": response})
         elif not context:
             st.error("Please upload relevant files to ask project-specific questions.")
