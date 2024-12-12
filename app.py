@@ -59,7 +59,7 @@ def generate_response(prompt):
         response = model.generate_content(prompt)  # Pass the prompt directly
 
         # Debug: Print the response structure
-        # st.write(response) # Comment out for brevity
+        st.write(response) # Comment out for brevity
 
         return response.text  # Use 'text' attribute instead of 'generated_text'
     except Exception as e:
