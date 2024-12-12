@@ -51,17 +51,25 @@ def upload_data():
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', st.secrets.get("GOOGLE_API_KEY"))
 genai.configure(api_key=GOOGLE_API_KEY)
 
+# Function to extract text from PDF
+def extract_text_from_pdf(pdf_file):
+    try:
+        reader = PdfReader(pdf_file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text.strip()
+    except Exception as e:
+        st.error(f"Error reading PDF: {e}")
+        return ""
 
 # Function to generate response from the model
-def generate_response(prompt):
+def generate_response(prompt, context):
     try:
         model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(prompt)  # Pass the prompt directly
-
-        # Debug: Print the response structure
-        st.write(response) # Comment out for brevity
-
-        return response.text  # Use 'text' attribute instead of 'generated_text'
+        # Include context from uploaded data in the prompt
+        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
+        return response.text  # Use 'text' attribute
     except Exception as e:
         st.error(f"Error generating response: {e}")
         return "Sorry, I couldn't process your request."
