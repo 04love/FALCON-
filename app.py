@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-from PyPDF2 import PdfReade
+from PyPDF2 import PdfReader
 import google.generativeai as genai
 from snowflake.snowpark import Session
 
