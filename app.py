@@ -59,14 +59,16 @@ def extract_text_from_pdf(pdf_file):
 # Function to generate response from the model
 def generate_response(prompt, context):
     try:
+        st.write("Generating response with the following context:")  # Debug
+        st.write(context[:500])  # Show preview of the context
         model = genai.GenerativeModel('gemini-pro')
-        # Include context from uploaded data in the prompt
         response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
-        return response.text  # Use 'text' attribute
+        st.write("Response generated!")  # Debug
+        return response.text
     except Exception as e:
         st.error(f"Error generating response: {e}")
-        return "Sorry, I couldn't process your request."
-        
+        return "Sorry, there was an error processing your request."
+
 # Page 1: Dashboard
 def dashboard():
     st.image('Logo.png', use_container_width=True)
