@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-from PyPDF2 import PdfReader
+#from PyPDF2 import PdfReader
 import google.generativeai as genai
 from snowflake.snowpark import Session
 
@@ -44,18 +44,17 @@ if data:
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', st.secrets.get("GOOGLE_API_KEY"))
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Function to extract text from PDF
-def extract_text_from_pdf(pdf_file):
-    try:
-        reader = PdfReader(pdf_file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text()
-        return text.strip()
-    except Exception as e:
-        st.error(f"Error reading PDF: {e}")
-        return ""
-
+# # Function to extract text from PDF
+# def extract_text_from_pdf(pdf_file):
+#     try:
+#         reader = PdfReader(pdf_file)
+#         text = ""
+#         for page in reader.pages:
+#             text += page.extract_text()
+#         return text.strip()
+#     except Exception as e:
+#         st.error(f"Error reading PDF: {e}")
+#         return ""
 # Function to generate response from the model
 def generate_response(prompt, context):
     try:
@@ -192,37 +191,38 @@ def Explainable_AI():
 def Chat_With_Data():
     st.title("Food Hamper Demand Forecasting")
     st.write("Upload Food Hamper project related files and ask questions based on the data.")
-       # File upload
-    uploaded_files = st.file_uploader("Upload your project files (CSV/Excel/PDF)", type=["csv", "xlsx", "pdf"], accept_multiple_files=True)
+    # File upload
+    uploaded_files = st.file_uploader("Upload your project files (CSV/Excel)", type=["csv", "xlsx"], accept_multiple_files=True)
 
     # Prepare data context
-    data_context = ""
+    dataframes = {}
     if uploaded_files:
         for file in uploaded_files:
             try:
                 if file.name.endswith('.csv'):
-                    df = pd.read_csv(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
+                    dataframes[file.name] = pd.read_csv(file)
                 elif file.name.endswith('.xlsx'):
-                    df = pd.read_excel(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
-                elif file.name.endswith('.pdf'):
-                    text = extract_text_from_pdf(file)
-                    data_context += f"\nExtracted text from {file.name}:\n{text[:1000]}...\n"  # Limit to first 1000 characters
-                st.success(f"Successfully processed {file.name}")
+                    dataframes[file.name] = pd.read_excel(file)
+                st.success(f"Successfully loaded {file.name}")
             except Exception as e:
-                st.error(f"Error processing {file.name}: {e}")
+                st.error(f"Error loading {file.name}: {e}")
+
+    # Create context from data
+    context = ""
+    for file_name, df in dataframes.items():
+        context += f"\nData from {file_name}:\n"
+        context += df.head(5).to_string()  # Include a preview of the data (first 5 rows)
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
     user_input = st.text_input("Ask a question about your project:", key="input")
     if st.button("Send"):
-        if user_input and data_context:
+        if user_input and context:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            response = generate_response(user_input, data_context)
+            response = generate_response(user_input, context)
             st.session_state.chat_history.append({"role": "assistant", "content": response})
-        elif not data_context:
+        elif not context:
             st.error("Please upload relevant files to ask project-specific questions.")
 
     for message in st.session_state.chat_history:
