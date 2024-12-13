@@ -68,7 +68,7 @@ def generate_response(prompt, context):
         
 # Page 1: Dashboard
 def dashboard():
-    st.image('Logo.png', use_column_width=True)
+    st.image('Logo.png', use_container_width=True)
     st.subheader("💡 Abstract:")
     inspiration = '''
 Food Security: Ensuring everyone has access to sufficient, nutritious food is a key challenge. This project seeks to predict food hamper demand and help organizations optimize resource allocation.
@@ -182,8 +182,8 @@ def machine_learning_modeling():
         
 # Page 5: XAI
 def Explainable_AI():
-    st.image('XAI.png', use_column_width=True)
-    st.image('XAI1.png', use_column_width=True)  
+    st.image('XAI.png', use_container_width=True)
+    st.image('XAI1.png', use_container_width=True)  
 
 # Page 6: chatbot
 
