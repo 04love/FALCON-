@@ -22,7 +22,7 @@ st.success("Connected to Snowflake!")
 def load_data():
     try:
         # Load datasets
-        df = pd.read_csv('df.csv')
+        df = pd.read_csv('df.csv', low_memory=False)
         merged_cleaned = pd.read_csv('merged_cleaned.csv', low_memory=False)
         food_hampers_fact = pd.read_csv('Food Hampers Fact.csv', low_memory=False)
         clients_data = pd.read_csv('Clients Data Dimension1.csv', low_memory=False)
@@ -115,7 +115,7 @@ def exploratory_data_analysis():
 
 #  Create a bar plot to visualize the demand by day
     plt.figure(figsize=(10, 6))
-    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis')
+    sns.barplot(x='DayOfWeek', y='quantity', data=day_demand, palette='viridis', hue=None)
     plt.title('Total Demand by Day of the Week', fontsize=16)
     plt.xlabel('Day of the Week', fontsize=12)
     plt.ylabel('Total Quantity', fontsize=12)
