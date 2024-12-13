@@ -228,7 +228,7 @@ def Chat_With_Data():
         st.session_state.chat_history = []
 
     # User input
-    user_input = st.text_input("Ask a question about the Food Hamper project (e.g., 'What are the top 5 products?')", key="input")
+    user_input = st.text_input("Ask a question about the Food Hamper project", key="input")
     if st.button("Send"):
         if user_input:
             # Save user input to chat history
