@@ -58,7 +58,7 @@ def extract_text_from_pdf(pdf_file):
 def generate_response(prompt, context):
     try:
         st.write("Generating response with the following context:")  # Debug
-        #st.write(context[:500])  # Show preview of the context
+        st.write(context)  # Show preview of the context
         model = genai.GenerativeModel('gemini-pro')
         # Use a formatted prompt for structured responses
         structured_prompt = f"""
