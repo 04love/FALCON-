@@ -9,3 +9,4 @@ streamlit==1.40.2
 snowflake-snowpark-python>=0.9.0
 snowflake-connector-python>=2.8.0
 google-generativeai
+PyPDF2==3.0.0 
