@@ -189,7 +189,7 @@ def generate_response(prompt, context):
         return "Sorry, I couldn't process your request."
 
 # Streamlit app
-def main():
+def Chat_With_Data():
     st.title("Food Hamper Project-Specified Chatbot")
     st.write("Upload Food Hamper project-related files and ask questions based on the data.")
 
