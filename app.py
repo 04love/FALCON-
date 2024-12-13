@@ -55,33 +55,16 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         st.error(f"Error reading PDF: {e}")
         return ""
+# Function to generate response from the model
 def generate_response(prompt, context):
     try:
-        st.write("Generating response with the following context:")  # Debug
-        st.write(context)  # Show preview of the context
         model = genai.GenerativeModel('gemini-pro')
-        # Use a formatted prompt for structured responses
-        structured_prompt = f"""
-        You are an advanced AI designed to provide precise, structured, and professional answers to questions. 
-        Given the context and question below, respond with clarity, proper formatting, and impactful words.
-
-        **Context**: 
-        {context}
-
-        **Question**:
-        {prompt}
-
-        **Response Format**:
-        - **Introduction**: Provide a brief context or overview.
-        - **Detailed Answer**: Present the answer in points or paragraphs as appropriate.
-        - **Conclusion**: Summarize the response or suggest next steps.
-        """
-        response = model.generate_content(structured_prompt)
-        st.write("Response generated!")  # Debug
-        return response.text
+        # Include context from uploaded data in the prompt
+        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
+        return response.text  # Use 'text' attribute
     except Exception as e:
         st.error(f"Error generating response: {e}")
-        return "Sorry, there was an error processing your request."
+        return "Sorry, I couldn't process your request."
 
 
 
