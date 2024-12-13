@@ -181,23 +181,17 @@ def extract_text_from_pdf(pdf_file):
 def generate_response(prompt, context):
     try:
         model = genai.GenerativeModel('gemini-pro')
-        # Include context and specify the scope in the prompt
-        constrained_prompt = (
-            f"You are a data assistant for a Food Hamper project. Use only the provided data to answer questions. "
-            f"Do not speculate or provide information outside the given context.\n\n"
-            f"User Query: {prompt}\n\n"
-            f"Context:\n{context[:4000]}"  # Limit context to 4000 characters
-        )
-        response = model.generate_content(constrained_prompt)
+        # Include context from uploaded data in the prompt
+        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
         return response.text  # Use 'text' attribute
     except Exception as e:
         st.error(f"Error generating response: {e}")
-        return "Sorry, I couldn't process your request. Please try again."
+        return "Sorry, I couldn't process your request."
 
 # Streamlit app
-def Chat_With_Data():
-    st.title("Food Hamper Project-Specific Chatbot")
-    st.write("Upload Food Hamper project-related files and ask questions based on the data.")
+def main():
+    st.title("Project-Specific Chatbot")
+    st.write("Upload project-related files and ask questions based on the data.")
 
     # File upload
     uploaded_files = st.file_uploader("Upload your project files (CSV/Excel/PDF)", type=["csv", "xlsx", "pdf"], accept_multiple_files=True)
@@ -209,7 +203,7 @@ def Chat_With_Data():
             try:
                 if file.name.endswith('.csv'):
                     df = pd.read_csv(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"  # Include first 5 rows
+                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
                 elif file.name.endswith('.xlsx'):
                     df = pd.read_excel(file)
                     data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
@@ -219,34 +213,21 @@ def Chat_With_Data():
                 st.success(f"Successfully processed {file.name}")
             except Exception as e:
                 st.error(f"Error processing {file.name}: {e}")
-    
-    if not data_context:
-        st.warning("Please upload files to provide context for the chatbot.")
-        return
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # User input
-    user_input = st.text_input("Ask a question about the Food Hamper project", key="input")
+    user_input = st.text_input("Ask a question about your project:", key="input")
     if st.button("Send"):
-        if user_input:
-            # Save user input to chat history
+        if user_input and data_context:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            
-            # Generate model response
             response = generate_response(user_input, data_context)
-            
-            # Save model response to chat history
             st.session_state.chat_history.append({"role": "assistant", "content": response})
+        elif not data_context:
+            st.error("Please upload relevant files to ask project-specific questions.")
 
-    # Display chat history
-    st.write("### Chat History:")
     for message in st.session_state.chat_history:
-        if message["role"] == "user":
-            st.write(f"**User**: {message['content']}")
-        else:
-            st.write(f"**Assistant**: {message['content']}")
+        st.write(f"{message['role'].capitalize()}: {message['content']}")
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
