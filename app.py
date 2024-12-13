@@ -183,16 +183,16 @@ def generate_response(prompt, context):
         model = genai.GenerativeModel('gemini-pro')
         # Include context and specify the scope in the prompt
         constrained_prompt = (
-            f"You are a data assistant for a Food Hamper project. Only respond based on the provided data and "
-            f"reports uploaded by the user. Do not speculate or provide information outside the given context.\n\n"
+            f"You are a data assistant for a Food Hamper project. Use only the provided data to answer questions. "
+            f"Do not speculate or provide information outside the given context.\n\n"
             f"User Query: {prompt}\n\n"
-            f"Context:\n{context}"
+            f"Context:\n{context[:4000]}"  # Limit context to 4000 characters
         )
         response = model.generate_content(constrained_prompt)
         return response.text  # Use 'text' attribute
     except Exception as e:
         st.error(f"Error generating response: {e}")
-        return "Sorry, I couldn't process your request."
+        return "Sorry, I couldn't process your request. Please try again."
 
 # Streamlit app
 def Chat_With_Data():
@@ -209,7 +209,7 @@ def Chat_With_Data():
             try:
                 if file.name.endswith('.csv'):
                     df = pd.read_csv(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
+                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"  # Include first 5 rows
                 elif file.name.endswith('.xlsx'):
                     df = pd.read_excel(file)
                     data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
@@ -228,7 +228,7 @@ def Chat_With_Data():
         st.session_state.chat_history = []
 
     # User input
-    user_input = st.text_input("Ask a question about the Food Hamper project:", key="input")
+    user_input = st.text_input("Ask a question about the Food Hamper project (e.g., 'What are the top 5 products?')", key="input")
     if st.button("Send"):
         if user_input:
             # Save user input to chat history
@@ -241,8 +241,12 @@ def Chat_With_Data():
             st.session_state.chat_history.append({"role": "assistant", "content": response})
 
     # Display chat history
+    st.write("### Chat History:")
     for message in st.session_state.chat_history:
-        st.write(f"{message['role'].capitalize()}: {message['content']}")
+        if message["role"] == "user":
+            st.write(f"**User**: {message['content']}")
+        else:
+            st.write(f"**Assistant**: {message['content']}")
 # Main App Logic
 def main():
     st.sidebar.title("Food Hamper Prediction App")
