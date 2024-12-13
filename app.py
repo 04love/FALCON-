@@ -40,75 +40,6 @@ if data:
     df, merged_cleaned, food_hampers_fact, clients_data = data
 
 
-# Set up the API key
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', st.secrets.get("GOOGLE_API_KEY"))
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Function to extract text from PDF
-def extract_text_from_pdf(pdf_file):
-    try:
-        reader = PdfReader(pdf_file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text()
-        return text.strip()
-    except Exception as e:
-        st.error(f"Error reading PDF: {e}")
-        return ""
-# Function to summarize data context
-def summarize_data(data_context):
-    try:
-        column_summary = data_context.columns.to_list()
-        data_preview = data_context.head(5).to_string()
-        return f"Columns: {column_summary}\nSample Data:\n{data_preview}"
-    except Exception as e:
-        return f"Error summarizing data: {e}"
-
-# Function to parse the question
-def parse_question(question):
-    if "describe" in question.lower():
-        return "Description"
-    elif "analyze" in question.lower():
-        return "Analysis"
-    elif "predict" in question.lower():
-        return "Prediction"
-    return "General"
-
-# Function to generate response
-def generate_response(prompt, data_context):
-    try:
-        # Summarize data context
-        summarized_context = summarize_data(data_context)
-
-        # Parse the question type
-        question_type = parse_question(prompt)
-
-        # Create a structured prompt
-        structured_prompt = f"""
-        You are a professional assistant. Analyze the provided dataset context and answer the user's question comprehensively.
-
-        **Dataset Summary**:
-        {summarized_context}
-
-        **User's Question**:
-        {prompt}
-        **Response Format**:
-        1. **Introduction**: Briefly introduce the dataset.
-        2. **Detailed Analysis**: Provide insights into the data structure, columns, and any trends.
-        3. **Conclusion**: Summarize findings and suggest next steps or potential analysis.
-        
-        Tailor the response based on the question type: {question_type}.
-        """
-
-        # Generate response using the model
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(structured_prompt)
-        return response.text
-    except Exception as e:
-        return f"Error generating response: {e}"
-
-
-
 
 # Page 1: Dashboard
 def dashboard():
@@ -230,11 +161,38 @@ def Explainable_AI():
     st.image('XAI1.png', use_container_width=True)  
 
 # Page 6: chatbot
+# Set up the API key
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', st.secrets.get("GOOGLE_API_KEY"))
+genai.configure(api_key=GOOGLE_API_KEY)
+
+# Function to extract text from PDF
+def extract_text_from_pdf(pdf_file):
+    try:
+        reader = PdfReader(pdf_file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text.strip()
+    except Exception as e:
+        st.error(f"Error reading PDF: {e}")
+        return ""
+
+# Function to generate response from the model
+def generate_response(prompt, context):
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        # Include context from uploaded data in the prompt
+        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
+        return response.text  # Use 'text' attribute
+    except Exception as e:
+        st.error(f"Error generating response: {e}")
+        return "Sorry, I couldn't process your request."
 
 # Streamlit app
-def Chat_With_Data():
-    st.title("Food Hamper Demand Forecasting")
-    st.write("Upload Food Hamper project related files and ask questions based on the data.")
+def main():
+    st.title("Food Hamper Project-Specified Chatbot")
+    st.write("Upload Food Hamper project-related files and ask questions based on the data.")
+
     # File upload
     uploaded_files = st.file_uploader("Upload your project files (CSV/Excel/PDF)", type=["csv", "xlsx", "pdf"], accept_multiple_files=True)
 
@@ -268,6 +226,8 @@ def Chat_With_Data():
         elif not data_context:
             st.error("Please upload relevant files to ask project-specific questions.")
 
+    for message in st.session_state.chat_history:
+        st.write(f"{message['role'].capitalize()}: {message['content']}")
     for message in st.session_state.chat_history:
         st.write(f"{message['role'].capitalize()}: {message['content']}")
 # Main App Logic
