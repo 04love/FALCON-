@@ -55,7 +55,7 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         st.error(f"Error reading PDF: {e}")
         return ""
-        def generate_response(prompt, context):
+  def generate_response(prompt, context):
     try:
         st.write("Generating response with the following context:")  # Debug
         st.write(context[:500])  # Show preview of the context
@@ -82,6 +82,7 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         st.error(f"Error generating response: {e}")
         return "Sorry, there was an error processing your request."
+
 
 
 # Page 1: Dashboard
