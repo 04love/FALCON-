@@ -55,16 +55,58 @@ def extract_text_from_pdf(pdf_file):
     except Exception as e:
         st.error(f"Error reading PDF: {e}")
         return ""
-# Function to generate response from the model
-def generate_response(prompt, context):
+# Function to summarize data context
+def summarize_data(data_context):
     try:
-        model = genai.GenerativeModel('gemini-pro')
-        # Include context from uploaded data in the prompt
-        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
-        return response.text  # Use 'text' attribute
+        column_summary = data_context.columns.to_list()
+        data_preview = data_context.head(5).to_string()
+        return f"Columns: {column_summary}\nSample Data:\n{data_preview}"
     except Exception as e:
-        st.error(f"Error generating response: {e}")
-        return "Sorry, I couldn't process your request."
+        return f"Error summarizing data: {e}"
+
+# Function to parse the question
+def parse_question(question):
+    if "describe" in question.lower():
+        return "Description"
+    elif "analyze" in question.lower():
+        return "Analysis"
+    elif "predict" in question.lower():
+        return "Prediction"
+    return "General"
+
+# Function to generate response
+def generate_response(prompt, data_context):
+    try:
+        # Summarize data context
+        summarized_context = summarize_data(data_context)
+
+        # Parse the question type
+        question_type = parse_question(prompt)
+
+        # Create a structured prompt
+        structured_prompt = f"""
+        You are a professional assistant. Analyze the provided dataset context and answer the user's question comprehensively.
+
+        **Dataset Summary**:
+        {summarized_context}
+
+        **User's Question**:
+        {prompt}
+        **Response Format**:
+        1. **Introduction**: Briefly introduce the dataset.
+        2. **Detailed Analysis**: Provide insights into the data structure, columns, and any trends.
+        3. **Conclusion**: Summarize findings and suggest next steps or potential analysis.
+        
+        Tailor the response based on the question type: {question_type}.
+        """
+
+        # Generate response using the model
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(structured_prompt)
+        return response.text
+    except Exception as e:
+        return f"Error generating response: {e}"
+
 
 
 
