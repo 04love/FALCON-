@@ -23,7 +23,7 @@ def load_data():
     try:
         # Load datasets
         df = pd.read_csv('df.csv')
-        merged_cleaned = pd.read_csv('merged_cleaned.csv')
+        merged_cleaned = pd.read_csv('merged_cleaned.csv', low_memory=False)
         food_hampers_fact = pd.read_csv('Food Hampers Fact.csv', low_memory=False)
         clients_data = pd.read_csv('Clients Data Dimension1.csv', low_memory=False)
         return df, merged_cleaned, food_hampers_fact, clients_data
