@@ -181,8 +181,14 @@ def extract_text_from_pdf(pdf_file):
 def generate_response(prompt, context):
     try:
         model = genai.GenerativeModel('gemini-pro')
-        # Include context from uploaded data in the prompt
-        response = model.generate_content(f"{prompt}\n\nContext:\n{context}")
+        # Include context and specify the scope in the prompt
+        constrained_prompt = (
+            f"You are a data assistant for a Food Hamper project. Only respond based on the provided data and "
+            f"reports uploaded by the user. Do not speculate or provide information outside the given context.\n\n"
+            f"User Query: {prompt}\n\n"
+            f"Context:\n{context}"
+        )
+        response = model.generate_content(constrained_prompt)
         return response.text  # Use 'text' attribute
     except Exception as e:
         st.error(f"Error generating response: {e}")
@@ -190,7 +196,7 @@ def generate_response(prompt, context):
 
 # Streamlit app
 def Chat_With_Data():
-    st.title("Food Hamper Project-Specified Chatbot")
+    st.title("Food Hamper Project-Specific Chatbot")
     st.write("Upload Food Hamper project-related files and ask questions based on the data.")
 
     # File upload
@@ -213,21 +219,28 @@ def Chat_With_Data():
                 st.success(f"Successfully processed {file.name}")
             except Exception as e:
                 st.error(f"Error processing {file.name}: {e}")
+    
+    if not data_context:
+        st.warning("Please upload files to provide context for the chatbot.")
+        return
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    user_input = st.text_input("Ask a question about Food Hamper project:", key="input")
+    # User input
+    user_input = st.text_input("Ask a question about the Food Hamper project:", key="input")
     if st.button("Send"):
-        if user_input and data_context:
+        if user_input:
+            # Save user input to chat history
             st.session_state.chat_history.append({"role": "user", "content": user_input})
+            
+            # Generate model response
             response = generate_response(user_input, data_context)
+            
+            # Save model response to chat history
             st.session_state.chat_history.append({"role": "assistant", "content": response})
-        elif not data_context:
-            st.error("Please upload relevant files to ask project-specific questions.")
 
-    for message in st.session_state.chat_history:
-        st.write(f"{message['role'].capitalize()}: {message['content']}")
+    # Display chat history
     for message in st.session_state.chat_history:
         st.write(f"{message['role'].capitalize()}: {message['content']}")
 # Main App Logic
