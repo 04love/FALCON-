@@ -160,81 +160,6 @@ def Explainable_AI():
   st.image('XAI.png', use_container_width=True)
   st.image('XAI1.png', use_container_width=True)
 
-#Page 6
-import streamlit as st
-import pandas as pd
-from io import StringIO
-import numpy as np
-
-# Mock function to analyze uploaded data
-def analyze_data(df):
-    summary = {}
-    summary['Rows'] = df.shape[0]
-    summary['Columns'] = df.shape[1]
-    summary['Column Names'] = list(df.columns)
-    summary['Missing Values'] = df.isnull().sum().to_dict()
-    summary['Sample Data'] = df.head(3).to_string(index=False)
-    return summary
-
-# Generate response based on context and question
-def generate_response(user_input, data_context):
-    if "tell me about the data" in user_input.lower():
-        return f"The uploaded file contains:\n\n- **Rows**: {data_context['Rows']}\n- **Columns**: {data_context['Columns']}\n" \
-               f"- **Column Names**: {', '.join(data_context['Column Names'])}\n" \
-               f"- **Missing Values**: {data_context['Missing Values']}\n\n**Sample Data:**\n{data_context['Sample Data']}"
-    elif "missing values" in user_input.lower():
-        return f"Here are the missing values in the data:\n{data_context['Missing Values']}"
-    elif "column names" in user_input.lower():
-        return f"The columns in the data are:\n{', '.join(data_context['Column Names'])}"
-    else:
-        return "I'm analyzing the file. Can you ask something specific like 'Tell me about the data' or 'Show me missing values'?"
-
-def Chat_With_Data():
-    st.title("Project-Specific Chatbot")
-    st.write("Upload your data files and ask questions!")
-
-    uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
-    data_context = None  # Placeholder for analysis
-
-    # Process uploaded file
-    if uploaded_file:
-        try:
-            if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file)
-            elif uploaded_file.name.endswith('.xlsx'):
-                df = pd.read_excel(uploaded_file)
-
-            # Analyze data
-            data_context = analyze_data(df)
-            st.success(f"File '{uploaded_file.name}' successfully processed!")
-
-        except Exception as e:
-            st.error(f"Error processing file: {e}")
-
-    # Initialize chat history
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-
-    # User Input
-    user_input = st.text_input("Ask a question about your project:", key="input")
-    if st.button("Send"):
-        if user_input:
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
-
-            # Generate response based on file analysis
-            if data_context:
-                response = generate_response(user_input, data_context)
-            else:
-                response = "Please upload a file to enable project-specific answers."
-
-            st.session_state.chat_history.append({"role": "assistant", "content": response})
-        else:
-            st.error("Please type a question to proceed.")
-
-    # Display chat history
-    for message in st.session_state.chat_history:
-        st.write(f"**{message['role'].capitalize()}**: {message['content']}")
-
 
 # Main App Logic
 def main():
@@ -251,10 +176,8 @@ def main():
         machine_learning_modeling()
     elif app_page == "Explainable AI":
         Explainable_AI()
-    elif app_page == "Chat With Data":
-        Chat_With_Data()                                              
-                                                  
-
+                                             
+                                                
 if __name__ == "__main__":
     main()
     
