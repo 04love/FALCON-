@@ -157,8 +157,8 @@ def machine_learning_modeling():
         
 # Page 5: XAI
 def Explainable_AI():
-st.image('XAI.png', use_container_width=True)
-st.image('XAI1.png', use_container_width=True)
+  st.image('XAI.png', use_container_width=True)
+  st.image('XAI1.png', use_container_width=True)
 
 #Page 6
 # Mock function for generating responses
