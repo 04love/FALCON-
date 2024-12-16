@@ -156,9 +156,11 @@ def machine_learning_modeling():
         st.line_chart(future_predictions.set_index('Date')['Predicted Hamper Demand'])
         
 # Page 5: XAI
-import streamlit as st
-import pandas as pd
+def Explainable_AI():
+st.image('XAI.png', use_container_width=True)
+st.image('XAI1.png', use_container_width=True)
 
+#Page 6
 # Mock function for generating responses
 def generate_response(user_input, data_context):
     if data_context:
