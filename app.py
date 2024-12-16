@@ -161,26 +161,38 @@ def Explainable_AI():
   st.image('XAI1.png', use_container_width=True)
 
 #Page 6
-# Mock function for generating responses
-def generate_response(user_input, data_context):
-    if data_context:
-        return f"Analyzing uploaded data... Here's an answer to '{user_input}': [Data-based Response]"
-    else:
-        return f"Based on general knowledge, here's an answer to '{user_input}': [General Response]"
+import streamlit as st
+import pandas as pd
 
-# Mock function for extracting text from PDFs
+# Mock response function
+def generate_response(user_input, data_context):
+    # If there's a data context (files uploaded), provide a data-based response
+    if data_context:
+        return f"Based on the uploaded data, here's a response to '{user_input}':\n\n[Analyzing project-specific information...]"
+    # Otherwise, provide a general response
+    else:
+        # Default knowledge base
+        general_knowledge = {
+            "What is a project?": "A project is a temporary effort to achieve a specific goal or outcome.",
+            "How to improve accuracy?": "Improving accuracy involves clean data, proper preprocessing, and advanced models.",
+            "What is forecasting?": "Forecasting is predicting future trends based on historical data.",
+            "Tell me about data quality.": "Data quality ensures consistency, accuracy, and reliability for better decision-making."
+        }
+        return general_knowledge.get(user_input, "I'm not sure about that. Can you rephrase the question?")
+
+# Function for PDF text extraction
 def extract_text_from_pdf(file):
-    return "Extracted PDF text content here."
+    return "PDF text extraction is not yet implemented. Placeholder text here."
 
 def Chat_With_Data():
     st.title("Project-Specific Chatbot")
-    st.write("Ask questions about your project. Upload files for data-specific answers!")
+    st.write("Ask me anything about your project! Upload files for smarter, data-driven responses.")
 
-    # File upload
+    # File upload section
     uploaded_files = st.file_uploader("Upload your project files (CSV/Excel/PDF)", 
                                       type=["csv", "xlsx", "pdf"], accept_multiple_files=True)
 
-    # Prepare data context
+    # Prepare the data context
     data_context = ""
     if uploaded_files:
         for file in uploaded_files:
@@ -193,7 +205,7 @@ def Chat_With_Data():
                     data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
                 elif file.name.endswith('.pdf'):
                     text = extract_text_from_pdf(file)
-                    data_context += f"\nExtracted text from {file.name}:\n{text[:1000]}...\n"
+                    data_context += f"\nExtracted text from {file.name}:\n{text[:500]}...\n"
                 st.success(f"Processed {file.name}")
             except Exception as e:
                 st.error(f"Error processing {file.name}: {e}")
@@ -202,21 +214,26 @@ def Chat_With_Data():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # User input
+    # Chat interface
     user_input = st.text_input("Ask a question about your project:", key="input")
     if st.button("Send"):
         if user_input:
+            # Append user question to chat history
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
-            # Generate response with or without data context
+            # Generate a response
             response = generate_response(user_input, data_context)
             st.session_state.chat_history.append({"role": "assistant", "content": response})
         else:
-            st.error("Please type a question to proceed.")
+            st.error("Please enter a question.")
 
     # Display chat history
     for message in st.session_state.chat_history:
-        st.write(f"**{message['role'].capitalize()}:** {message['content']}")
+        if message['role'] == "user":
+            st.markdown(f"**You:** {message['content']}")
+        else:
+            st.markdown(f"**Bot:** {message['content']}")
+
 
 # Main App Logic
 def main():
