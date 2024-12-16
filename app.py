@@ -163,76 +163,77 @@ def Explainable_AI():
 #Page 6
 import streamlit as st
 import pandas as pd
+from io import StringIO
+import numpy as np
 
-# Mock response function
+# Mock function to analyze uploaded data
+def analyze_data(df):
+    summary = {}
+    summary['Rows'] = df.shape[0]
+    summary['Columns'] = df.shape[1]
+    summary['Column Names'] = list(df.columns)
+    summary['Missing Values'] = df.isnull().sum().to_dict()
+    summary['Sample Data'] = df.head(3).to_string(index=False)
+    return summary
+
+# Generate response based on context and question
 def generate_response(user_input, data_context):
-    # If there's a data context (files uploaded), provide a data-based response
-    if data_context:
-        return f"Based on the uploaded data, here's a response to '{user_input}':\n\n[Analyzing project-specific information...]"
-    # Otherwise, provide a general response
+    if "tell me about the data" in user_input.lower():
+        return f"The uploaded file contains:\n\n- **Rows**: {data_context['Rows']}\n- **Columns**: {data_context['Columns']}\n" \
+               f"- **Column Names**: {', '.join(data_context['Column Names'])}\n" \
+               f"- **Missing Values**: {data_context['Missing Values']}\n\n**Sample Data:**\n{data_context['Sample Data']}"
+    elif "missing values" in user_input.lower():
+        return f"Here are the missing values in the data:\n{data_context['Missing Values']}"
+    elif "column names" in user_input.lower():
+        return f"The columns in the data are:\n{', '.join(data_context['Column Names'])}"
     else:
-        # Default knowledge base
-        general_knowledge = {
-            "What is a project?": "A project is a temporary effort to achieve a specific goal or outcome.",
-            "How to improve accuracy?": "Improving accuracy involves clean data, proper preprocessing, and advanced models.",
-            "What is forecasting?": "Forecasting is predicting future trends based on historical data.",
-            "Tell me about data quality.": "Data quality ensures consistency, accuracy, and reliability for better decision-making."
-        }
-        return general_knowledge.get(user_input, "I'm not sure about that. Can you rephrase the question?")
-
-# Function for PDF text extraction
-def extract_text_from_pdf(file):
-    return "PDF text extraction is not yet implemented. Placeholder text here."
+        return "I'm analyzing the file. Can you ask something specific like 'Tell me about the data' or 'Show me missing values'?"
 
 def Chat_With_Data():
     st.title("Project-Specific Chatbot")
-    st.write("Ask me anything about your project! Upload files for smarter, data-driven responses.")
+    st.write("Upload your data files and ask questions!")
 
-    # File upload section
-    uploaded_files = st.file_uploader("Upload your project files (CSV/Excel/PDF)", 
-                                      type=["csv", "xlsx", "pdf"], accept_multiple_files=True)
+    uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
+    data_context = None  # Placeholder for analysis
 
-    # Prepare the data context
-    data_context = ""
-    if uploaded_files:
-        for file in uploaded_files:
-            try:
-                if file.name.endswith('.csv'):
-                    df = pd.read_csv(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
-                elif file.name.endswith('.xlsx'):
-                    df = pd.read_excel(file)
-                    data_context += f"\nData from {file.name}:\n{df.head(5).to_string()}\n"
-                elif file.name.endswith('.pdf'):
-                    text = extract_text_from_pdf(file)
-                    data_context += f"\nExtracted text from {file.name}:\n{text[:500]}...\n"
-                st.success(f"Processed {file.name}")
-            except Exception as e:
-                st.error(f"Error processing {file.name}: {e}")
+    # Process uploaded file
+    if uploaded_file:
+        try:
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            elif uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file)
+
+            # Analyze data
+            data_context = analyze_data(df)
+            st.success(f"File '{uploaded_file.name}' successfully processed!")
+
+        except Exception as e:
+            st.error(f"Error processing file: {e}")
 
     # Initialize chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Chat interface
+    # User Input
     user_input = st.text_input("Ask a question about your project:", key="input")
     if st.button("Send"):
         if user_input:
-            # Append user question to chat history
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            
-            # Generate a response
-            response = generate_response(user_input, data_context)
+
+            # Generate response based on file analysis
+            if data_context:
+                response = generate_response(user_input, data_context)
+            else:
+                response = "Please upload a file to enable project-specific answers."
+
             st.session_state.chat_history.append({"role": "assistant", "content": response})
         else:
-            st.error("Please enter a question.")
+            st.error("Please type a question to proceed.")
 
     # Display chat history
     for message in st.session_state.chat_history:
-        if message['role'] == "user":
-            st.markdown(f"**You:** {message['content']}")
-        else:
-            st.markdown(f"**Bot:** {message['content']}")
+        st.write(f"**{message['role'].capitalize()}**: {message['content']}")
 
 
 # Main App Logic
