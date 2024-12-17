@@ -104,9 +104,10 @@ def exploratory_data_analysis():
 def Visualizations():
     st.title('Streamlit App with Embedded My Google Map')
     st.write('Here is an example of embedded LDS Londonderry Map:')
-
     # Embedding Google Map using HTML iframe
-    st.markdown(https://lookerstudio.google.com/embed/reporting/20395848-bdf5-407a-a1f9-38981b686102/page/VVqIE
+    st.markdown("""
+<iframe width="600" height="450" src="https://lookerstudio.google.com/embed/reporting/20395848-bdf5-407a-a1f9-38981b686102/page/VVqIE" frameborder="0" style="border:0" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    """, unsafe_allow_html=True)
 # Page 4: Machine Learning Modeling (ARIMA for Food Hamper Prediction)
 def machine_learning_modeling():
     st.title("Food Hamper Demand Prediction")
